@@ -19,9 +19,10 @@ import config from '@/config';
           database: dbName,
           password,
           port,
-          ssl: {
-            rejectUnauthorized: false,
-          },
+          ssl:
+            process.env.NODE_ENV === 'production'
+              ? { rejectUnauthorized: false }
+              : false,
         });
       },
       inject: [config.KEY],
