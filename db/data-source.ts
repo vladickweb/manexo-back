@@ -16,7 +16,9 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
   seeds: ['dist/db/seeds/*{.ts,.js}'],
   factories: ['dist/db/factories/*{.ts,.js}'],
   synchronize: true,
-  ssl: false,
+  ssl: {
+    rejectUnauthorized: false,
+  },
   migrationsTableName: 'custom_migrations',
 };
 
