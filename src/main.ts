@@ -21,6 +21,11 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
+  // Utiliza el puerto asignado por Heroku o 3000 en local
+  const port = process.env.PORT || 3000;
+  await app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`Aplicación escuchando en el puerto ${port}`);
+  });
 }
 bootstrap();
