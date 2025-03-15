@@ -5,23 +5,25 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Configuración de CORS
+  // Permitir múltiples orígenes: el local y el de producción en Vercel
   app.enableCors({
-    origin: 'http://localhost:5173', // Permitir el origen del frontend
-    methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS', // Incluir OPTIONS
-    allowedHeaders: 'Content-Type,Authorization', // Asegurarse de que se permiten estas cabeceras
-    credentials: true, // Si se necesitan cookies o cabeceras con credenciales
+    origin: [
+      'http://localhost:5173',
+      'https://menexo-front-mctfrfo05-vladickwebs-projects.vercel.app',
+    ],
+    methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization',
+    credentials: true,
   });
 
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Elimina propiedades no declaradas en el DTO
-      forbidNonWhitelisted: true, // Lanza un error si hay propiedades no declaradas
-      transform: true, // Transforma datos automáticamente a los tipos especificados
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
-  // Utiliza el puerto asignado por Heroku o 3000 en local
   const port = process.env.PORT || 3000;
   await app.listen(port, () => {
     // eslint-disable-next-line no-console
