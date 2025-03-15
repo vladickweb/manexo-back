@@ -19,6 +19,9 @@ import config from '@/config';
           database: dbName,
           password,
           port,
+          ssl: {
+            rejectUnauthorized: false,
+          },
         });
       },
       inject: [config.KEY],
