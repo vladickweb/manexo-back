@@ -1,4 +1,4 @@
 export const environments = {
   dev: '.env',
-  prod: '.env',
+  prod: '.env.production.local',
 };
