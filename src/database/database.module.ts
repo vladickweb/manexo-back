@@ -1,9 +1,8 @@
 import { Module, Global } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dataSourceOptions } from 'db/data-source';
 import { Client } from 'pg';
-import config from '@/config';
 
 @Global()
 @Module({
@@ -11,8 +10,9 @@ import config from '@/config';
   providers: [
     {
       provide: 'PG',
-      useFactory: (configService: ConfigType<typeof config>) => {
-        const { user, host, dbName, password, port } = configService.postgres;
+      useFactory: (configService: ConfigService) => {
+        const { user, host, dbName, password, port } =
+          configService.get('config.postgres');
         return new Client({
           user,
           host,
@@ -20,12 +20,12 @@ import config from '@/config';
           password,
           port,
           ssl:
-            process.env.NODE_ENV === 'production'
+            configService.get('config.nodeEnv') === 'production'
               ? { rejectUnauthorized: false }
               : false,
         });
       },
-      inject: [config.KEY],
+      inject: [ConfigService],
     },
   ],
   exports: ['PG'],
