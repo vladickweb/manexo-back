@@ -17,8 +17,10 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "baseUrl": "./",
+    "types": ["node"],
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "esModuleInterop": true
   }
 }

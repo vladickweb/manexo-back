@@ -1,6 +1,7 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { config } from 'dotenv';
 import { SeederOptions } from 'typeorm-extension';
+import { User } from '../src/user/entities/user.entity';
 
 config();
 
@@ -11,7 +12,7 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
   username: process.env.POSTGRES_USER || 'default_user',
   password: process.env.POSTGRES_PASSWORD || 'default_password',
   database: process.env.POSTGRES_DB || 'default_db',
-  entities: ['dist/**/*.entity{.ts,.js}'],
+  entities: [User],
   migrations: ['dist/db/migrations/*{.ts,.js}'],
   seeds: ['dist/db/seeds/*{.ts,.js}'],
   factories: ['dist/db/factories/*{.ts,.js}'],

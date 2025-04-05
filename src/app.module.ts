@@ -3,7 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { environments } from 'environments';
 import configSchema from './configSchema';
 import { DatabaseModule } from './database/database.module';
-import { HealthModule } from 'src/health/health.module';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 import config from './config';
 @Module({
@@ -15,7 +16,9 @@ import config from './config';
       validationSchema: configSchema,
     }),
     DatabaseModule,
-    HealthModule,
+    // HealthModule,
+    UserModule,
+    AuthModule,
   ],
   providers: [],
 })
