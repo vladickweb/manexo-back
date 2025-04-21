@@ -1,0 +1,1165 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/users": {
+      "post": {
+        "operationId": "UserController_create",
+        "summary": "Create a new user",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The user has been successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "UserController_findAll",
+        "summary": "Get all users",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UserController_findOne",
+        "summary": "Get a user by id",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "UserController_update",
+        "summary": "Update a user",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The user has been successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "UserController_remove",
+        "summary": "Delete a user",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user has been successfully deleted."
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refreshToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/services": {
+      "post": {
+        "operationId": "ServiceController_create",
+        "summary": "Create a new service",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The service has been successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        },
+        "tags": [
+          "services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "ServiceController_findAll",
+        "summary": "Get all services",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all services.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Service"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/services/{id}": {
+      "get": {
+        "operationId": "ServiceController_findOne",
+        "summary": "Get a service by id",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the service.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Service not found."
+          }
+        },
+        "tags": [
+          "services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "ServiceController_update",
+        "summary": "Update a service",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The service has been successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Service not found."
+          }
+        },
+        "tags": [
+          "services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "ServiceController_remove",
+        "summary": "Delete a service",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The service has been successfully deleted."
+          },
+          "404": {
+            "description": "Service not found."
+          }
+        },
+        "tags": [
+          "services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/services/user/{userId}": {
+      "get": {
+        "operationId": "ServiceController_findByUserId",
+        "summary": "Get services by user id",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return all services for the user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Service"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "tags": [
+          "services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/services/category/{categoryId}": {
+      "get": {
+        "operationId": "ServiceController_findByCategoryId",
+        "summary": "Get services by category id",
+        "parameters": [
+          {
+            "name": "categoryId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return all services for the category.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Service"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found."
+          }
+        },
+        "tags": [
+          "services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/categories": {
+      "post": {
+        "operationId": "CategoryController_create",
+        "summary": "Create a new category",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The category has been successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        },
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "CategoryController_findAll",
+        "summary": "Get all categories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Return all categories.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/categories/{id}": {
+      "get": {
+        "operationId": "CategoryController_findOne",
+        "summary": "Get a category by id",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Return the category.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found."
+          }
+        },
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "CategoryController_update",
+        "summary": "Update a category",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The category has been successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Category not found."
+          }
+        },
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "CategoryController_remove",
+        "summary": "Delete a category",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The category has been successfully deleted."
+          },
+          "404": {
+            "description": "Category not found."
+          }
+        },
+        "tags": [
+          "categories"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Manexo API",
+    "description": "API documentation for Manexo application",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "user@example.com",
+            "description": "Email del usuario"
+          },
+          "password": {
+            "type": "string",
+            "example": "password123",
+            "description": "Contraseña del usuario",
+            "minLength": 6
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John",
+            "description": "Nombre del usuario"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe",
+            "description": "Apellido del usuario"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único del usuario",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "email": {
+            "type": "string",
+            "description": "Correo electrónico del usuario",
+            "example": "usuario@ejemplo.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Contraseña del usuario (encriptada)",
+            "example": "********"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Nombre del usuario",
+            "example": "Juan"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Apellido del usuario",
+            "example": "Pérez"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de creación del usuario",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de última actualización del usuario",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "services": {
+            "description": "Lista de servicios asociados al usuario",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Service"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "password",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único de la categoría",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nombre de la categoría",
+            "example": "Plomería"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción de la categoría",
+            "example": "Servicios de plomería y fontanería"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icono de la categoría",
+            "example": "faucet"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de creación de la categoría",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de última actualización de la categoría",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "services": {
+            "description": "Lista de servicios asociados a la categoría",
+            "type": "array",
+            "items": {
+              "type": "array"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único del servicio",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "title": {
+            "type": "string",
+            "description": "Título del servicio",
+            "example": "Servicio de plomería"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción detallada del servicio",
+            "example": "Servicio profesional de plomería a domicilio"
+          },
+          "location": {
+            "type": "object",
+            "description": "Ubicación del servicio",
+            "example": {
+              "address": "Calle Principal 123",
+              "city": "Ciudad",
+              "country": "País"
+            }
+          },
+          "price": {
+            "type": "number",
+            "description": "Precio del servicio",
+            "example": 50
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Estado del servicio (activo/inactivo)",
+            "example": true,
+            "default": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de creación del servicio",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de última actualización del servicio",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "user": {
+            "description": "Usuario que ofrece el servicio",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "category": {
+            "description": "Categoría del servicio",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Category"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "location",
+          "price",
+          "isActive",
+          "createdAt",
+          "updatedAt",
+          "user",
+          "category"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email del usuario",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Contraseña del usuario",
+            "example": "newpassword123"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Nombre del usuario",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Apellido del usuario",
+            "example": "Doe"
+          }
+        }
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email del usuario",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Contraseña del usuario",
+            "example": "password123",
+            "minLength": 6
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Nombre del usuario",
+            "example": "John"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Apellido del usuario",
+            "example": "Doe"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email del usuario",
+            "example": "user@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Contraseña del usuario",
+            "example": "password123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Token de refresco para obtener un nuevo token de acceso",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "CreateServiceDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Título del servicio",
+            "example": "Servicio de plomería"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción detallada del servicio",
+            "example": "Servicio profesional de plomería a domicilio"
+          },
+          "location": {
+            "type": "string",
+            "description": "Ubicación del servicio",
+            "example": "{\"address\": \"Calle Principal 123\", \"city\": \"Ciudad\", \"country\": \"País\"}"
+          },
+          "price": {
+            "type": "number",
+            "description": "Precio del servicio",
+            "example": 50
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Si el servicio está activo",
+            "example": true,
+            "default": true
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID del usuario que ofrece el servicio",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "ID de la categoría del servicio",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "location",
+          "price",
+          "isActive",
+          "userId",
+          "categoryId"
+        ]
+      },
+      "UpdateServiceDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Título del servicio",
+            "example": "Servicio de plomería"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción detallada del servicio",
+            "example": "Servicio profesional de plomería a domicilio"
+          },
+          "location": {
+            "type": "string",
+            "description": "Ubicación del servicio",
+            "example": "{\"address\": \"Calle Principal 123\", \"city\": \"Ciudad\", \"country\": \"País\"}"
+          },
+          "price": {
+            "type": "number",
+            "description": "Precio del servicio",
+            "example": 50
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Si el servicio está activo",
+            "example": true
+          },
+          "categoryId": {
+            "type": "string",
+            "description": "ID de la categoría del servicio",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          }
+        }
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Plomería",
+            "description": "Nombre de la categoría"
+          },
+          "description": {
+            "type": "string",
+            "example": "Servicios de plomería y fontanería",
+            "description": "Descripción de la categoría"
+          },
+          "icon": {
+            "type": "string",
+            "example": "faucet",
+            "description": "Icono de la categoría"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre de la categoría",
+            "example": "Plomería"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descripción de la categoría",
+            "example": "Servicios de plomería y fontanería"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icono de la categoría",
+            "example": "faucet"
+          }
+        }
+      }
+    }
+  }
+}

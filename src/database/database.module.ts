@@ -1,33 +1,22 @@
-import { Module, Global } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { dataSourceOptions } from 'db/data-source';
-import { Client } from 'pg';
+import { ConfigService } from '@nestjs/config';
 
-@Global()
 @Module({
-  imports: [TypeOrmModule.forRoot(dataSourceOptions)],
-  providers: [
-    {
-      provide: 'PG',
-      useFactory: (configService: ConfigService) => {
-        const { user, host, dbName, password, port } =
-          configService.get('config.postgres');
-        return new Client({
-          user,
-          host,
-          database: dbName,
-          password,
-          port,
-          ssl:
-            configService.get('config.nodeEnv') === 'production'
-              ? { rejectUnauthorized: false }
-              : false,
-        });
-      },
+  imports: [
+    TypeOrmModule.forRootAsync({
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get('POSTGRES_HOST'),
+        port: +configService.get('POSTGRES_PORT'),
+        username: configService.get('POSTGRES_USER'),
+        password: configService.get('POSTGRES_PASSWORD'),
+        database: configService.get('POSTGRES_DB'),
+        autoLoadEntities: true,
+        synchronize: false,
+      }),
       inject: [ConfigService],
-    },
+    }),
   ],
-  exports: ['PG'],
 })
 export class DatabaseModule {}
