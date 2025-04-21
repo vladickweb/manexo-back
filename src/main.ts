@@ -24,6 +24,9 @@ async function bootstrap() {
     }),
   );
 
+  // Configurar Swagger
+  await AppModule.setupSwagger(app);
+
   const port = process.env.PORT || 3000;
   await app.listen(port, () => {
     // eslint-disable-next-line no-console
