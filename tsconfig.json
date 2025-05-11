@@ -22,5 +22,7 @@
       "@/*": ["src/*"]
     },
     "esModuleInterop": true
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

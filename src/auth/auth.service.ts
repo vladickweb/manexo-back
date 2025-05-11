@@ -21,6 +21,7 @@ export class AuthService {
       ...registerDto,
       password: hashedPassword,
     });
+
     return this.generateTokens(user);
   }
 
@@ -85,6 +86,12 @@ export class AuthService {
   }
 
   async getProfile(userId: string) {
-    return this.userService.findById(userId);
+    const user = await this.userService.findById(userId);
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    return user;
   }
 }
