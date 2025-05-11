@@ -1,21 +1,20 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { environments } from 'environments';
 import configSchema from './configSchema';
-import { DatabaseModule } from './database/database.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ServiceModule } from './service/service.module';
 import { CategoryModule } from './category/category.module';
-import { User } from './user/entities/user.entity';
-import { Service } from './service/entities/service.entity';
-import { Category } from './category/entities/category.entity';
+import { ContractModule } from './contract/contract.module';
+import { ReviewModule } from './review/review.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
-
+import { FavoriteModule } from './favorite/favorite.module';
 import config from './config';
+import dataSource from './db/data-source';
 
 @Module({
   imports: [
@@ -25,26 +24,14 @@ import config from './config';
       load: [config],
       validationSchema: configSchema,
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('POSTGRES_HOST'),
-        port: +configService.get('POSTGRES_PORT'),
-        username: configService.get('POSTGRES_USER'),
-        password: configService.get('POSTGRES_PASSWORD'),
-        database: configService.get('POSTGRES_DB'),
-        entities: [User, Service, Category],
-        synchronize: false,
-      }),
-      inject: [ConfigService],
-    }),
-    DatabaseModule,
-    // HealthModule,
+    TypeOrmModule.forRoot(dataSource.options),
     UserModule,
     AuthModule,
     ServiceModule,
     CategoryModule,
+    ContractModule,
+    ReviewModule,
+    FavoriteModule,
   ],
   providers: [],
 })

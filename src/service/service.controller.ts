@@ -6,17 +6,25 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
+  Query,
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Service } from './entities/service.entity';
+import { Request } from 'express';
+import { User } from '../user/entities/user.entity';
+import { FilterServiceDto } from './dto/filter-service.dto';
 
 @ApiTags('services')
 @ApiBearerAuth()
@@ -25,84 +33,85 @@ export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new service' })
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Crear un nuevo servicio' })
   @ApiResponse({
     status: 201,
-    description: 'The service has been successfully created.',
+    description: 'Servicio creado exitosamente',
     type: Service,
   })
-  @ApiResponse({ status: 400, description: 'Bad request.' })
-  create(@Body() createServiceDto: CreateServiceDto) {
-    return this.serviceService.create(createServiceDto);
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Categoría no encontrada' })
+  create(@Body() createServiceDto: CreateServiceDto, @Req() req: Request) {
+    return this.serviceService.create(createServiceDto, req.user as User);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all services' })
+  @ApiOperation({ summary: 'Obtener todos los servicios' })
+  @ApiQuery({ name: 'categoryId', required: false, type: String })
+  @ApiQuery({ name: 'minPrice', required: false, type: Number })
+  @ApiQuery({ name: 'maxPrice', required: false, type: Number })
+  @ApiQuery({ name: 'isActive', required: false, type: Boolean })
   @ApiResponse({
     status: 200,
-    description: 'Return all services.',
+    description: 'Lista de servicios',
     type: [Service],
   })
-  findAll() {
-    return this.serviceService.findAll();
+  findAll(@Query() filters?: FilterServiceDto) {
+    return this.serviceService.findAll(filters);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a service by id' })
+  @ApiOperation({ summary: 'Obtener un servicio por ID' })
   @ApiResponse({
     status: 200,
-    description: 'Return the service.',
+    description: 'Servicio encontrado',
     type: Service,
   })
-  @ApiResponse({ status: 404, description: 'Service not found.' })
+  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
   findOne(@Param('id') id: string) {
     return this.serviceService.findOne(id);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a service' })
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Actualizar un servicio' })
   @ApiResponse({
     status: 200,
-    description: 'The service has been successfully updated.',
+    description: 'Servicio actualizado',
     type: Service,
   })
-  @ApiResponse({ status: 404, description: 'Service not found.' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({
+    status: 404,
+    description: 'Servicio o categoría no encontrada',
+  })
   update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
     return this.serviceService.update(id, updateServiceDto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a service' })
-  @ApiResponse({
-    status: 200,
-    description: 'The service has been successfully deleted.',
-  })
-  @ApiResponse({ status: 404, description: 'Service not found.' })
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Eliminar un servicio' })
+  @ApiResponse({ status: 200, description: 'Servicio eliminado' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
   remove(@Param('id') id: string) {
     return this.serviceService.remove(id);
   }
 
-  @Get('user/:userId')
-  @ApiOperation({ summary: 'Get services by user id' })
+  @Get('me/published')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Obtener los servicios publicados por el usuario autenticado',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Return all services for the user.',
+    description: 'Lista de servicios publicados por el usuario',
     type: [Service],
   })
-  @ApiResponse({ status: 404, description: 'User not found.' })
-  findByUserId(@Param('userId') userId: string) {
-    return this.serviceService.findByUserId(userId);
-  }
-
-  @Get('category/:categoryId')
-  @ApiOperation({ summary: 'Get services by category id' })
-  @ApiResponse({
-    status: 200,
-    description: 'Return all services for the category.',
-    type: [Service],
-  })
-  @ApiResponse({ status: 404, description: 'Category not found.' })
-  findByCategoryId(@Param('categoryId') categoryId: string) {
-    return this.serviceService.findByCategoryId(categoryId);
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  findMyPublishedServices(@Req() req: Request) {
+    return this.serviceService.findMyPublishedServices(req.user as User);
   }
 }

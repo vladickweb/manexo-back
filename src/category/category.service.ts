@@ -21,19 +21,19 @@ export class CategoryService {
     return await this.categoryRepository.find();
   }
 
-  async findOne(id: string): Promise<Category> {
+  async findOne(id: number): Promise<Category> {
     return await this.categoryRepository.findOne({ where: { id } });
   }
 
   async update(
-    id: string,
+    id: number,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
     await this.categoryRepository.update(id, updateCategoryDto);
     return await this.findOne(id);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.categoryRepository.delete(id);
   }
 }

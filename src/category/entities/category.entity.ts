@@ -7,27 +7,28 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Service } from '../../service/entities/service.entity';
+import { Subcategory } from './subcategory.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Category {
   @ApiProperty({
     description: 'ID único de la categoría',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: 1,
   })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @ApiProperty({
     description: 'Nombre de la categoría',
-    example: 'Plomería',
+    example: 'Hogar',
   })
   @Column()
   name: string;
 
   @ApiProperty({
     description: 'Descripción de la categoría',
-    example: 'Servicios de plomería y fontanería',
+    example: 'Servicios de hogar',
     required: false,
   })
   @Column({ nullable: true })
@@ -35,7 +36,7 @@ export class Category {
 
   @ApiProperty({
     description: 'Icono de la categoría',
-    example: 'faucet',
+    example: 'home',
     required: false,
   })
   @Column({ nullable: true })
@@ -60,6 +61,11 @@ export class Category {
     type: [Service],
     required: false,
   })
-  @OneToMany(() => Service, (service) => service.category)
-  services: Service[];
+  @ApiProperty({
+    description: 'Lista de subcategorías asociadas a la categoría',
+    type: [Subcategory],
+    required: false,
+  })
+  @OneToMany(() => Subcategory, (subcategory) => subcategory.category)
+  subcategories: Subcategory[];
 }

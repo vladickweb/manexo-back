@@ -55,7 +55,7 @@ export class CategoryController {
     type: Category,
   })
   @ApiResponse({ status: 404, description: 'Category not found.' })
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.categoryService.findOne(id);
   }
 
@@ -68,7 +68,7 @@ export class CategoryController {
   })
   @ApiResponse({ status: 404, description: 'Category not found.' })
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoryService.update(id, updateCategoryDto);
@@ -81,7 +81,7 @@ export class CategoryController {
     description: 'The category has been successfully deleted.',
   })
   @ApiResponse({ status: 404, description: 'Category not found.' })
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: number) {
     return this.categoryService.remove(id);
   }
 }
