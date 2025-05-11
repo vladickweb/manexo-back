@@ -7,16 +7,35 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Service } from '../../service/entities/service.entity';
+import { Contract } from '../../contract/entities/contract.entity';
+import { Review } from '../../review/entities/review.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Favorite } from '../../favorite/entities/favorite.entity';
 
 @Entity()
 export class User {
   @ApiProperty({
     description: 'ID único del usuario',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: 1,
   })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ApiProperty({
+    description: 'Nombre del usuario',
+    example: 'Juan',
+    required: false,
+  })
+  @Column({ nullable: true })
+  firstName: string;
+
+  @ApiProperty({
+    description: 'Apellido del usuario',
+    example: 'Perez',
+    required: false,
+  })
+  @Column({ nullable: true })
+  lastName: string;
 
   @ApiProperty({
     description: 'Correo electrónico del usuario',
@@ -33,20 +52,19 @@ export class User {
   password: string;
 
   @ApiProperty({
-    description: 'Nombre del usuario',
-    example: 'Juan',
+    description: 'Avatar del usuario',
+    example: 'https://example.com/avatar.jpg',
     required: false,
   })
   @Column({ nullable: true })
-  firstName: string;
+  avatar: string;
 
   @ApiProperty({
-    description: 'Apellido del usuario',
-    example: 'Pérez',
-    required: false,
+    description: 'Estado activo del usuario',
+    example: true,
   })
-  @Column({ nullable: true })
-  lastName: string;
+  @Column({ default: true })
+  isActive: boolean;
 
   @ApiProperty({
     description: 'Fecha de creación del usuario',
@@ -67,6 +85,15 @@ export class User {
     type: [Service],
     required: false,
   })
-  @OneToMany(() => Service, (service) => service.user, { cascade: true })
+  @OneToMany(() => Service, (service) => service.user)
   services: Service[];
+
+  @OneToMany(() => Contract, (contract) => contract.requester)
+  contracts: Contract[];
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
+
+  @OneToMany(() => Favorite, (favorite) => favorite.user, { cascade: true })
+  favorites: Favorite[];
 }

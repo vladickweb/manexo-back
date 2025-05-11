@@ -1,55 +1,111 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNumber, IsString, IsUUID } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsBoolean,
+  IsOptional,
+  IsObject,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import { Type } from 'class-transformer';
+
+class LocationDto {
+  @ApiProperty({
+    description: 'Latitud de la ubicación',
+    example: 19.4326,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  latitude: number;
+
+  @ApiProperty({
+    description: 'Longitud de la ubicación',
+    example: -99.1332,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  longitude: number;
+
+  @ApiProperty({
+    description: 'Dirección completa',
+    example: 'Calle Principal 123, Ciudad de México',
+  })
+  @IsString()
+  @IsNotEmpty()
+  address: string;
+}
 
 export class CreateServiceDto {
   @ApiProperty({
-    description: 'Título del servicio',
-    example: 'Servicio de plomería',
-  })
-  @IsString()
-  title: string;
-
-  @ApiProperty({
     description: 'Descripción detallada del servicio',
-    example: 'Servicio profesional de plomería a domicilio',
+    example: 'Ofrezco servicios de plomería residencial y comercial',
   })
   @IsString()
+  @IsNotEmpty()
   description: string;
 
   @ApiProperty({
-    description: 'Ubicación del servicio',
-    example:
-      '{"address": "Calle Principal 123", "city": "Ciudad", "country": "País"}',
+    description: 'Radio de cobertura del servicio',
+    example: 10,
   })
-  @IsString()
-  location: string;
+  @IsNumber()
+  @IsNotEmpty()
+  radius: number;
+
+  @ApiProperty({
+    description: 'Ubicación del servicio',
+    type: LocationDto,
+  })
+  @IsObject()
+  @ValidateNested()
+  @Type(() => LocationDto)
+  @IsNotEmpty()
+  location: LocationDto;
 
   @ApiProperty({
     description: 'Precio del servicio',
-    example: 50.0,
+    example: 500,
   })
   @IsNumber()
+  @IsNotEmpty()
   price: number;
 
   @ApiProperty({
-    description: 'Si el servicio está activo',
-    example: true,
-    default: true,
+    description: 'ID de la categoría a la que pertenece el servicio',
+    example: 1,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  categoryId: number;
+
+  @ApiProperty({
+    description: 'Indica si el servicio requiere aceptación manual',
+    example: false,
+    required: false,
   })
   @IsBoolean()
-  isActive: boolean;
+  @IsOptional()
+  requiresAcceptance?: boolean;
 
   @ApiProperty({
-    description: 'ID del usuario que ofrece el servicio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'Lista de IDs de subcategorías',
+    example: [1, 2],
+    required: false,
   })
-  @IsUUID()
-  userId: string;
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @IsOptional()
+  subcategoryIds?: number[];
 
   @ApiProperty({
-    description: 'ID de la categoría del servicio',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: 'Lista de URLs de imágenes del servicio',
+    example: ['https://example.com/image1.jpg'],
+    required: false,
   })
-  @IsUUID()
-  categoryId: string;
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  images?: string[];
 }
