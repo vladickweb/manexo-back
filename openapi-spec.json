@@ -1252,13 +1252,49 @@
           "address": {
             "type": "string",
             "description": "Dirección completa",
-            "example": "Calle Principal 123, Ciudad de México"
+            "example": "Avenida Reforma 123, Ciudad de México"
+          },
+          "streetName": {
+            "type": "string",
+            "description": "Nombre de la calle",
+            "example": "Avenida Reforma"
+          },
+          "streetNumber": {
+            "type": "string",
+            "description": "Número de la calle",
+            "example": "123"
+          },
+          "city": {
+            "type": "string",
+            "description": "Ciudad",
+            "example": "Ciudad de México"
+          },
+          "province": {
+            "type": "string",
+            "description": "Provincia/Estado",
+            "example": "CDMX"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Código postal",
+            "example": "06500"
+          },
+          "country": {
+            "type": "string",
+            "description": "País",
+            "example": "México"
           }
         },
         "required": [
           "latitude",
           "longitude",
-          "address"
+          "address",
+          "streetName",
+          "streetNumber",
+          "city",
+          "province",
+          "postalCode",
+          "country"
         ]
       },
       "CreateServiceDto": {
