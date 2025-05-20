@@ -1,40 +1,79 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsNumber, IsBoolean } from 'class-validator';
+import {
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  IsArray,
+  IsString,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class FilterServiceDto {
   @ApiProperty({
-    description: 'ID de la categoría para filtrar',
-    example: 1,
+    description: 'IDs de las categorías',
     required: false,
+    type: [String],
+    isArray: true,
   })
-  @IsNumber()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  categoryId?: number;
+  categoryIds?: string[];
 
   @ApiProperty({
-    description: 'Precio máximo del servicio',
-    example: 1000,
+    description: 'Precio mínimo',
     required: false,
   })
   @IsNumber()
-  @IsOptional()
-  maxPrice?: number;
-
-  @ApiProperty({
-    description: 'Precio mínimo del servicio',
-    example: 100,
-    required: false,
-  })
-  @IsNumber()
+  @Type(() => Number)
   @IsOptional()
   minPrice?: number;
 
   @ApiProperty({
-    description: 'Filtrar solo servicios activos',
-    example: true,
+    description: 'Precio máximo',
+    required: false,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  maxPrice?: number;
+
+  @ApiProperty({
+    description: 'Estado activo del servicio',
     required: false,
   })
   @IsBoolean()
+  @Type(() => Boolean)
   @IsOptional()
   isActive?: boolean;
+
+  @ApiProperty({
+    description: 'Latitud del usuario',
+    required: false,
+    example: 37.62332465580069,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  latitude?: number;
+
+  @ApiProperty({
+    description: 'Longitud del usuario',
+    required: false,
+    example: -0.9851654443962178,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  longitude?: number;
+
+  @ApiProperty({
+    description: 'Radio de búsqueda en metros',
+    required: false,
+    example: 5000,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  radius?: number;
 }

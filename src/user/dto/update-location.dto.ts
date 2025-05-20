@@ -1,12 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsEmail,
-  IsOptional,
+  IsNumber,
   IsString,
-  MinLength,
   IsObject,
   ValidateNested,
-  IsNumber,
+  IsNotEmpty,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -16,120 +14,82 @@ class LocationDto {
     example: 19.4326,
   })
   @IsNumber()
-  @IsOptional()
-  latitude?: number;
+  @IsNotEmpty()
+  latitude: number;
 
   @ApiProperty({
     description: 'Longitud de la ubicación',
     example: -99.1332,
   })
   @IsNumber()
-  @IsOptional()
-  longitude?: number;
+  @IsNotEmpty()
+  longitude: number;
 
   @ApiProperty({
     description: 'Dirección completa',
     example: 'Avenida Reforma 123, Ciudad de México',
   })
   @IsString()
-  @IsOptional()
-  address?: string;
+  @IsNotEmpty()
+  address: string;
 
   @ApiProperty({
     description: 'Nombre de la calle',
     example: 'Avenida Reforma',
   })
   @IsString()
-  @IsOptional()
-  streetName?: string;
+  @IsNotEmpty()
+  streetName: string;
 
   @ApiProperty({
     description: 'Número de la calle',
     example: '123',
   })
   @IsString()
-  @IsOptional()
-  streetNumber?: string;
+  @IsNotEmpty()
+  streetNumber: string;
 
   @ApiProperty({
     description: 'Ciudad',
     example: 'Ciudad de México',
   })
   @IsString()
-  @IsOptional()
-  city?: string;
+  @IsNotEmpty()
+  city: string;
 
   @ApiProperty({
     description: 'Provincia/Estado',
     example: 'CDMX',
   })
   @IsString()
-  @IsOptional()
-  province?: string;
+  @IsNotEmpty()
+  province: string;
 
   @ApiProperty({
     description: 'Código postal',
     example: '06500',
   })
   @IsString()
-  @IsOptional()
-  postalCode?: string;
+  @IsNotEmpty()
+  postalCode: string;
 
   @ApiProperty({
     description: 'País',
     example: 'México',
   })
   @IsString()
-  @IsOptional()
-  country?: string;
+  @IsNotEmpty()
+  country: string;
 }
 
-export class UpdateUserDto {
-  @ApiProperty({
-    description: 'Email del usuario',
-    example: 'user@example.com',
-    required: false,
-  })
-  @IsEmail()
-  @IsOptional()
-  email?: string;
-
-  @ApiProperty({
-    description: 'Contraseña del usuario',
-    example: 'newpassword123',
-    required: false,
-  })
-  @IsString()
-  @MinLength(6)
-  @IsOptional()
-  password?: string;
-
-  @ApiProperty({
-    description: 'Nombre del usuario',
-    example: 'John',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  firstName?: string;
-
-  @ApiProperty({
-    description: 'Apellido del usuario',
-    example: 'Doe',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  lastName?: string;
-
+export class UpdateLocationDto {
   @ApiProperty({
     description: 'Ubicación del usuario',
     type: LocationDto,
-    required: false,
   })
   @IsObject()
   @ValidateNested()
   @Type(() => LocationDto)
-  @IsOptional()
-  location?: LocationDto;
+  @IsNotEmpty()
+  location: LocationDto;
 }

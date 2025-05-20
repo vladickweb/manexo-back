@@ -4,46 +4,57 @@ import { Repository } from 'typeorm';
 import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
-import { User } from '../user/entities/user.entity';
-import { Category } from '../category/entities/category.entity';
-import { Subcategory } from '../category/entities/subcategory.entity';
 import { FilterServiceDto } from './dto/filter-service.dto';
+import { PaginationDto } from './dto/pagination.dto';
+import { User } from '../user/entities/user.entity';
+import { PaginatedResponse } from '../common/interfaces/paginated-response.interface';
 
 @Injectable()
 export class ServiceService {
   constructor(
     @InjectRepository(Service)
     private serviceRepository: Repository<Service>,
-    @InjectRepository(Category)
-    private categoryRepository: Repository<Category>,
-    @InjectRepository(Subcategory)
-    private subcategoryRepository: Repository<Subcategory>,
   ) {}
 
   async create(
     createServiceDto: CreateServiceDto,
     user: User,
   ): Promise<Service> {
-    const subcategory = await this.subcategoryRepository.findOne({
-      where: { id: createServiceDto.categoryId },
-    });
-
-    if (!subcategory) {
-      throw new NotFoundException(
-        `Subcategoría con ID ${createServiceDto.categoryId} no encontrada`,
-      );
-    }
-
     const service = this.serviceRepository.create({
       ...createServiceDto,
       user,
-      subcategory,
     });
 
     return await this.serviceRepository.save(service);
   }
 
-  async findAll(filters?: FilterServiceDto): Promise<Service[]> {
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
+    const R = 6371e3; // Radio de la Tierra en metros
+    const φ1 = (lat1 * Math.PI) / 180;
+    const φ2 = (lat2 * Math.PI) / 180;
+    const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+    const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a =
+      Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+      Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distancia en metros
+  }
+
+  async findAll(
+    filters?: FilterServiceDto,
+    pagination?: PaginationDto,
+  ): Promise<PaginatedResponse<Service>> {
+    const { page = 1, limit = 10 } = pagination || {};
+    const skip = (page - 1) * limit;
+
     const queryBuilder = this.serviceRepository
       .createQueryBuilder('service')
       .leftJoinAndSelect('service.user', 'user')
@@ -51,9 +62,9 @@ export class ServiceService {
       .leftJoinAndSelect('subcategory.category', 'category');
 
     if (filters) {
-      if (filters.categoryId) {
-        queryBuilder.andWhere('service.subcategoryId = :categoryId', {
-          categoryId: filters.categoryId,
+      if (filters.categoryIds?.length > 0) {
+        queryBuilder.andWhere('subcategory.categoryId IN (:...categoryIds)', {
+          categoryIds: filters.categoryIds,
         });
       }
 
@@ -76,13 +87,50 @@ export class ServiceService {
       }
     }
 
-    return await queryBuilder.getMany();
+    // Obtener el total de registros
+    const total = await queryBuilder.getCount();
+
+    // Aplicar paginación
+    queryBuilder.skip(skip).take(limit);
+
+    const services = await queryBuilder.getMany();
+
+    // Si se proporcionan coordenadas y radio, filtrar por distancia
+    let filteredServices = services;
+    if (filters?.latitude && filters?.longitude && filters?.radius) {
+      filteredServices = services
+        .filter((service) => {
+          if (!service.user?.location) return false;
+
+          const distance = this.calculateDistance(
+            filters.latitude,
+            filters.longitude,
+            service.user.location.latitude,
+            service.user.location.longitude,
+          );
+
+          service['distance'] = Math.round(distance);
+
+          return distance <= filters.radius;
+        })
+        .sort((a, b) => a['distance'] - b['distance']);
+    }
+
+    return {
+      data: filteredServices,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOne(id: string): Promise<Service> {
     const service = await this.serviceRepository.findOne({
       where: { id: Number(id) },
-      relations: ['user', 'category', 'subcategory'],
+      relations: ['user'],
     });
 
     if (!service) {
@@ -97,20 +145,6 @@ export class ServiceService {
     updateServiceDto: UpdateServiceDto,
   ): Promise<Service> {
     const service = await this.findOne(id);
-
-    if (updateServiceDto.categoryId) {
-      const subcategory = await this.subcategoryRepository.findOne({
-        where: { id: updateServiceDto.categoryId },
-        relations: ['category'],
-      });
-
-      if (!subcategory) {
-        throw new NotFoundException('Subcategoría no encontrada');
-      }
-
-      service.subcategory = subcategory;
-      service.subcategory.category = subcategory.category;
-    }
 
     Object.assign(service, updateServiceDto);
     return await this.serviceRepository.save(service);

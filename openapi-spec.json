@@ -185,6 +185,65 @@
         ]
       }
     },
+    "/users/location": {
+      "patch": {
+        "operationId": "UserController_updateLocation",
+        "summary": "Update authenticated user location",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The user location has been successfully updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/users/test": {
+      "patch": {
+        "operationId": "UserController_test",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/auth/register": {
       "post": {
         "operationId": "AuthController_register",
@@ -306,32 +365,35 @@
         "summary": "Obtener todos los servicios",
         "parameters": [
           {
-            "name": "categoryId",
+            "name": "categoryIds",
             "required": false,
             "in": "query",
-            "description": "ID de la categoría para filtrar",
+            "description": "IDs de las categorías a filtrar",
             "schema": {
-              "example": 1,
-              "type": "string"
-            }
-          },
-          {
-            "name": "maxPrice",
-            "required": false,
-            "in": "query",
-            "description": "Precio máximo del servicio",
-            "schema": {
-              "example": 1000,
-              "type": "number"
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "a"
+                }
+              }
             }
           },
           {
             "name": "minPrice",
             "required": false,
             "in": "query",
-            "description": "Precio mínimo del servicio",
+            "description": "Precio mínimo",
             "schema": {
-              "example": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxPrice",
+            "required": false,
+            "in": "query",
+            "description": "Precio máximo",
+            "schema": {
               "type": "number"
             }
           },
@@ -339,22 +401,94 @@
             "name": "isActive",
             "required": false,
             "in": "query",
-            "description": "Filtrar solo servicios activos",
+            "description": "Estado activo del servicio",
             "schema": {
-              "example": true,
               "type": "boolean"
+            }
+          },
+          {
+            "name": "latitude",
+            "required": false,
+            "in": "query",
+            "description": "Latitud del usuario",
+            "schema": {
+              "example": 37.62332465580069,
+              "type": "number"
+            }
+          },
+          {
+            "name": "longitude",
+            "required": false,
+            "in": "query",
+            "description": "Longitud del usuario",
+            "schema": {
+              "example": -0.9851654443962178,
+              "type": "number"
+            }
+          },
+          {
+            "name": "radius",
+            "required": false,
+            "in": "query",
+            "description": "Radio de búsqueda en metros",
+            "schema": {
+              "example": 5000,
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Número de página",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Número de elementos por página",
+            "schema": {
+              "minimum": 1,
+              "default": 10,
+              "type": "number"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Lista de servicios",
+            "description": "Lista de servicios paginada",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Service"
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Service"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number"
+                        },
+                        "page": {
+                          "type": "number"
+                        },
+                        "limit": {
+                          "type": "number"
+                        },
+                        "totalPages": {
+                          "type": "number"
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -1115,6 +1249,21 @@
             "description": "Avatar del usuario",
             "example": "https://example.com/avatar.jpg"
           },
+          "location": {
+            "type": "object",
+            "description": "Ubicación del usuario",
+            "example": {
+              "latitude": 19.4326,
+              "longitude": -99.1332,
+              "address": "Avenida Reforma 123, Ciudad de México",
+              "streetName": "Avenida Reforma",
+              "streetNumber": "123",
+              "city": "Ciudad de México",
+              "province": "CDMX",
+              "postalCode": "06500",
+              "country": "México"
+            }
+          },
           "isActive": {
             "type": "boolean",
             "description": "Estado activo del usuario",
@@ -1149,6 +1298,83 @@
           "updatedAt"
         ]
       },
+      "LocationDto": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "description": "Latitud de la ubicación",
+            "example": 19.4326
+          },
+          "longitude": {
+            "type": "number",
+            "description": "Longitud de la ubicación",
+            "example": -99.1332
+          },
+          "address": {
+            "type": "string",
+            "description": "Dirección completa",
+            "example": "Avenida Reforma 123, Ciudad de México"
+          },
+          "streetName": {
+            "type": "string",
+            "description": "Nombre de la calle",
+            "example": "Avenida Reforma"
+          },
+          "streetNumber": {
+            "type": "string",
+            "description": "Número de la calle",
+            "example": "123"
+          },
+          "city": {
+            "type": "string",
+            "description": "Ciudad",
+            "example": "Ciudad de México"
+          },
+          "province": {
+            "type": "string",
+            "description": "Provincia/Estado",
+            "example": "CDMX"
+          },
+          "postalCode": {
+            "type": "string",
+            "description": "Código postal",
+            "example": "06500"
+          },
+          "country": {
+            "type": "string",
+            "description": "País",
+            "example": "México"
+          }
+        },
+        "required": [
+          "latitude",
+          "longitude",
+          "address",
+          "streetName",
+          "streetNumber",
+          "city",
+          "province",
+          "postalCode",
+          "country"
+        ]
+      },
+      "UpdateLocationDto": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "description": "Ubicación del usuario",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocationDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "location"
+        ]
+      },
       "UpdateUserDto": {
         "type": "object",
         "properties": {
@@ -1171,6 +1397,14 @@
             "type": "string",
             "description": "Apellido del usuario",
             "example": "Doe"
+          },
+          "location": {
+            "description": "Ubicación del usuario",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LocationDto"
+              }
+            ]
           }
         }
       },
@@ -1234,67 +1468,6 @@
         },
         "required": [
           "refreshToken"
-        ]
-      },
-      "LocationDto": {
-        "type": "object",
-        "properties": {
-          "latitude": {
-            "type": "number",
-            "description": "Latitud de la ubicación",
-            "example": 19.4326
-          },
-          "longitude": {
-            "type": "number",
-            "description": "Longitud de la ubicación",
-            "example": -99.1332
-          },
-          "address": {
-            "type": "string",
-            "description": "Dirección completa",
-            "example": "Avenida Reforma 123, Ciudad de México"
-          },
-          "streetName": {
-            "type": "string",
-            "description": "Nombre de la calle",
-            "example": "Avenida Reforma"
-          },
-          "streetNumber": {
-            "type": "string",
-            "description": "Número de la calle",
-            "example": "123"
-          },
-          "city": {
-            "type": "string",
-            "description": "Ciudad",
-            "example": "Ciudad de México"
-          },
-          "province": {
-            "type": "string",
-            "description": "Provincia/Estado",
-            "example": "CDMX"
-          },
-          "postalCode": {
-            "type": "string",
-            "description": "Código postal",
-            "example": "06500"
-          },
-          "country": {
-            "type": "string",
-            "description": "País",
-            "example": "México"
-          }
-        },
-        "required": [
-          "latitude",
-          "longitude",
-          "address",
-          "streetName",
-          "streetNumber",
-          "city",
-          "province",
-          "postalCode",
-          "country"
         ]
       },
       "CreateServiceDto": {

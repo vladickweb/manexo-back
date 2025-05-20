@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateLocationDto } from './dto/update-location.dto';
 
 @Injectable()
 export class UserService {
@@ -34,6 +35,16 @@ export class UserService {
     updateUserDto: Partial<UpdateUserDto>,
   ): Promise<User | null> {
     await this.userRepository.update(id, updateUserDto);
+    return await this.findById(id);
+  }
+
+  async updateLocation(
+    id: string,
+    updateLocationDto: UpdateLocationDto,
+  ): Promise<User | null> {
+    await this.userRepository.update(id, {
+      location: updateLocationDto.location,
+    });
     return await this.findById(id);
   }
 

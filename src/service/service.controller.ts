@@ -25,6 +25,8 @@ import { Service } from './entities/service.entity';
 import { Request } from 'express';
 import { User } from '../user/entities/user.entity';
 import { FilterServiceDto } from './dto/filter-service.dto';
+import { PaginationDto } from './dto/pagination.dto';
+import { PaginatedResponse } from '../common/interfaces/paginated-response.interface';
 
 @ApiTags('services')
 @ApiBearerAuth()
@@ -48,17 +50,72 @@ export class ServiceController {
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los servicios' })
-  @ApiQuery({ name: 'categoryId', required: false, type: String })
+  @ApiQuery({
+    name: 'categoryIds',
+    required: false,
+    type: [String],
+    isArray: true,
+    description: 'IDs de las categorías a filtrar',
+  })
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
   @ApiQuery({ name: 'isActive', required: false, type: Boolean })
+  @ApiQuery({
+    name: 'latitude',
+    required: false,
+    type: Number,
+    description: 'Latitud del usuario',
+  })
+  @ApiQuery({
+    name: 'longitude',
+    required: false,
+    type: Number,
+    description: 'Longitud del usuario',
+  })
+  @ApiQuery({
+    name: 'radius',
+    required: false,
+    type: Number,
+    description: 'Radio de búsqueda en metros',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Número de elementos por página',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de servicios',
-    type: [Service],
+    description: 'Lista de servicios paginada',
+    schema: {
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/Service' },
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            total: { type: 'number' },
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            totalPages: { type: 'number' },
+          },
+        },
+      },
+    },
   })
-  findAll(@Query() filters?: FilterServiceDto) {
-    return this.serviceService.findAll(filters);
+  findAll(
+    @Query() filters?: FilterServiceDto,
+    @Query() pagination?: PaginationDto,
+  ): Promise<PaginatedResponse<Service>> {
+    return this.serviceService.findAll(filters, pagination);
   }
 
   @Get(':id')

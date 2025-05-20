@@ -6,6 +6,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import * as bcrypt from 'bcryptjs';
+import { instanceToPlain } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
@@ -78,10 +79,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-      },
+      user: instanceToPlain(user),
     };
   }
 
@@ -92,6 +90,6 @@ export class AuthService {
       throw new UnauthorizedException('Usuario no encontrado');
     }
 
-    return user;
+    return instanceToPlain(user);
   }
 }
