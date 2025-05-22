@@ -15,6 +15,9 @@ import { join } from 'path';
 import { FavoriteModule } from './favorite/favorite.module';
 import config from './config';
 import dataSource from './db/data-source';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { AvailabilityModule } from './availability/availability.module';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [
@@ -32,6 +35,9 @@ import dataSource from './db/data-source';
     ContractModule,
     ReviewModule,
     FavoriteModule,
+    CloudinaryModule,
+    AvailabilityModule,
+    BookingModule,
   ],
   providers: [],
 })

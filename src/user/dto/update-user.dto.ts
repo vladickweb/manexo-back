@@ -86,6 +86,15 @@ class LocationDto {
 
 export class UpdateUserDto {
   @ApiProperty({
+    description: 'Nombre del usuario',
+    example: 'John',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @ApiProperty({
     description: 'Email del usuario',
     example: 'user@example.com',
     required: false,
@@ -103,6 +112,24 @@ export class UpdateUserDto {
   @MinLength(6)
   @IsOptional()
   password?: string;
+
+  @ApiProperty({
+    description: 'Imagen de perfil del usuario',
+    example: 'https://example.com/profile.jpg',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  profileImageUrl?: string;
+
+  @ApiProperty({
+    description: 'ID de la imagen de perfil del usuario',
+    example: '1234567890',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  profileImagePublicId?: string;
 
   @ApiProperty({
     description: 'Nombre del usuario',

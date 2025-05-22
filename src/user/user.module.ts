@@ -6,9 +6,13 @@ import { UserController } from './user.controller';
 import { Service } from '../service/entities/service.entity';
 import { Contract } from '../contract/entities/contract.entity';
 import { Review } from '../review/entities/review.entity';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Service, Contract, Review])],
+  imports: [
+    TypeOrmModule.forFeature([User, Service, Contract, Review]),
+    CloudinaryModule,
+  ],
   controllers: [UserController],
   providers: [UserService],
   exports: [UserService],

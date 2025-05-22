@@ -11,6 +11,8 @@ import { User } from '../../user/entities/user.entity';
 import { Subcategory } from '../../category/entities/subcategory.entity';
 import { Contract } from '../../contract/entities/contract.entity';
 import { Review } from '../../review/entities/review.entity';
+import { Booking } from '../../booking/entities/booking.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Service {
@@ -56,6 +58,14 @@ export class Service {
 
   @OneToMany(() => Review, (review) => review.service)
   reviews: Review[];
+
+  @ApiProperty({
+    description: 'Lista de reservas asociadas al servicio',
+    type: [Booking],
+    required: false,
+  })
+  @OneToMany(() => Booking, (booking) => booking.service)
+  bookings: Booking[];
 
   @CreateDateColumn()
   createdAt: Date;

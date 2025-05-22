@@ -244,6 +244,78 @@
         ]
       }
     },
+    "/users/{id}/profile-image": {
+      "post": {
+        "operationId": "UserController_uploadProfileImage",
+        "summary": "Subir imagen de perfil",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "UserController_removeProfileImage",
+        "summary": "Eliminar imagen de perfil",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "users"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/auth/register": {
       "post": {
         "operationId": "AuthController_register",
@@ -1163,6 +1235,287 @@
           }
         ]
       }
+    },
+    "/availabilities": {
+      "post": {
+        "operationId": "AvailabilityController_create",
+        "summary": "Crear una nueva disponibilidad",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Disponibilidad creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Availability"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        },
+        "tags": [
+          "availabilities"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "get": {
+        "operationId": "AvailabilityController_findAll",
+        "summary": "Obtener todas las disponibilidades del usuario",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de disponibilidades",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Availability"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        },
+        "tags": [
+          "availabilities"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/availabilities/day/{dayOfWeek}": {
+      "get": {
+        "operationId": "AvailabilityController_findByDayOfWeek",
+        "summary": "Obtener disponibilidades por día de la semana",
+        "parameters": [
+          {
+            "name": "dayOfWeek",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de disponibilidades para el día especificado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Availability"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        },
+        "tags": [
+          "availabilities"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/availabilities/{id}": {
+      "get": {
+        "operationId": "AvailabilityController_findOne",
+        "summary": "Obtener una disponibilidad por ID",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disponibilidad encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Availability"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado"
+          },
+          "404": {
+            "description": "Disponibilidad no encontrada"
+          }
+        },
+        "tags": [
+          "availabilities"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "AvailabilityController_update",
+        "summary": "Actualizar una disponibilidad",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Disponibilidad actualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Availability"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado"
+          },
+          "404": {
+            "description": "Disponibilidad no encontrada"
+          }
+        },
+        "tags": [
+          "availabilities"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "AvailabilityController_remove",
+        "summary": "Eliminar una disponibilidad",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disponibilidad eliminada"
+          },
+          "401": {
+            "description": "No autorizado"
+          },
+          "404": {
+            "description": "Disponibilidad no encontrada"
+          }
+        },
+        "tags": [
+          "availabilities"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/availabilities/batch": {
+      "post": {
+        "operationId": "AvailabilityController_batchUpdate",
+        "summary": "Actualizar todas las disponibilidades en lote",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchAvailabilityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Disponibilidades actualizadas exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Availability"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        },
+        "tags": [
+          "availabilities"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
     }
   },
   "info": {
@@ -1212,9 +1565,73 @@
           "password"
         ]
       },
-      "Service": {
+      "Availability": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único de la disponibilidad",
+            "example": 1
+          },
+          "dayOfWeek": {
+            "type": "number",
+            "description": "Día de la semana (0-6, donde 0 es domingo)",
+            "example": 6
+          },
+          "startTime": {
+            "type": "string",
+            "description": "Hora de inicio en formato HH:mm",
+            "example": "09:00"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "Hora de fin en formato HH:mm",
+            "example": "17:00"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Estado activo de la disponibilidad",
+            "example": true
+          },
+          "user": {
+            "description": "Usuario que ofrece el servicio",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "bookings": {
+            "description": "Reservas asociadas a esta disponibilidad",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Booking"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de creación de la disponibilidad",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de última actualización de la disponibilidad",
+            "example": "2024-03-20T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "dayOfWeek",
+          "startTime",
+          "endTime",
+          "isActive",
+          "user",
+          "bookings",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "User": {
         "type": "object",
@@ -1287,6 +1704,20 @@
             "items": {
               "$ref": "#/components/schemas/Service"
             }
+          },
+          "availabilities": {
+            "description": "Lista de disponibilidades del usuario",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Availability"
+            }
+          },
+          "bookings": {
+            "description": "Lista de reservas realizadas por el usuario",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Booking"
+            }
           }
         },
         "required": [
@@ -1297,6 +1728,114 @@
           "createdAt",
           "updatedAt"
         ]
+      },
+      "Booking": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único de la reserva",
+            "example": 1
+          },
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de la reserva",
+            "example": "2024-03-23"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "Hora de inicio en formato HH:mm",
+            "example": "17:00"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "Hora de fin en formato HH:mm",
+            "example": "19:00"
+          },
+          "status": {
+            "type": "string",
+            "description": "Estado de la reserva",
+            "example": "PENDING",
+            "enum": [
+              "PENDING",
+              "CONFIRMED",
+              "CANCELLED",
+              "COMPLETED"
+            ]
+          },
+          "client": {
+            "description": "Usuario que realiza la reserva",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "availability": {
+            "description": "Disponibilidad asociada a la reserva",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Availability"
+              }
+            ]
+          },
+          "service": {
+            "description": "Servicio reservado",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Service"
+              }
+            ]
+          },
+          "totalPrice": {
+            "type": "number",
+            "description": "Precio total de la reserva",
+            "example": 100
+          },
+          "notes": {
+            "type": "string",
+            "description": "Notas adicionales de la reserva",
+            "example": "Por favor, traer productos de limpieza"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de creación de la reserva",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de última actualización de la reserva",
+            "example": "2024-03-20T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "date",
+          "startTime",
+          "endTime",
+          "status",
+          "client",
+          "availability",
+          "service",
+          "totalPrice",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "bookings": {
+            "description": "Lista de reservas asociadas al servicio",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Booking"
+            }
+          }
+        }
       },
       "LocationDto": {
         "type": "object",
@@ -1378,6 +1917,11 @@
       "UpdateUserDto": {
         "type": "object",
         "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre del usuario",
+            "example": "John"
+          },
           "email": {
             "type": "string",
             "description": "Email del usuario",
@@ -1387,6 +1931,16 @@
             "type": "string",
             "description": "Contraseña del usuario",
             "example": "newpassword123"
+          },
+          "profileImageUrl": {
+            "type": "string",
+            "description": "Imagen de perfil del usuario",
+            "example": "https://example.com/profile.jpg"
+          },
+          "profileImagePublicId": {
+            "type": "string",
+            "description": "ID de la imagen de perfil del usuario",
+            "example": "1234567890"
           },
           "firstName": {
             "type": "string",
@@ -1707,6 +2261,80 @@
       "CreateFavoriteDto": {
         "type": "object",
         "properties": {}
+      },
+      "CreateAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "number",
+            "description": "Día de la semana (0-6, donde 0 es domingo)",
+            "example": 6,
+            "minimum": 0,
+            "maximum": 6
+          },
+          "startTime": {
+            "type": "string",
+            "description": "Hora de inicio en formato HH:mm",
+            "example": "09:00"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "Hora de fin en formato HH:mm",
+            "example": "17:00"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Estado activo de la disponibilidad",
+            "example": true
+          }
+        },
+        "required": [
+          "dayOfWeek",
+          "startTime",
+          "endTime"
+        ]
+      },
+      "UpdateAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "dayOfWeek": {
+            "type": "number",
+            "description": "Día de la semana (0-6, donde 0 es domingo)",
+            "example": 6,
+            "minimum": 0,
+            "maximum": 6
+          },
+          "startTime": {
+            "type": "string",
+            "description": "Hora de inicio en formato HH:mm",
+            "example": "09:00"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "Hora de fin en formato HH:mm",
+            "example": "17:00"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Estado activo de la disponibilidad",
+            "example": true
+          }
+        }
+      },
+      "BatchAvailabilityDto": {
+        "type": "object",
+        "properties": {
+          "availabilities": {
+            "description": "Array de disponibilidades a actualizar",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateAvailabilityDto"
+            }
+          }
+        },
+        "required": [
+          "availabilities"
+        ]
       }
     }
   }

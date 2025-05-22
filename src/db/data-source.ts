@@ -7,6 +7,8 @@ import { Subcategory } from '../category/entities/subcategory.entity';
 import { Contract } from '../contract/entities/contract.entity';
 import { Review } from '../review/entities/review.entity';
 import { Favorite } from '../favorite/entities/favorite.entity';
+import { Availability } from '../availability/entities/availability.entity';
+import { Booking } from '../booking/entities/booking.entity';
 
 config();
 
@@ -17,7 +19,17 @@ export const dataSourceOptions: DataSourceOptions = {
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [User, Service, Category, Subcategory, Contract, Review, Favorite],
+  entities: [
+    User,
+    Service,
+    Category,
+    Subcategory,
+    Contract,
+    Review,
+    Favorite,
+    Availability,
+    Booking,
+  ],
   migrations: ['src/db/migrations/*.ts'],
   migrationsTableName: 'migrations',
   migrationsRun: false,

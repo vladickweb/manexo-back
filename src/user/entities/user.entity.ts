@@ -12,6 +12,8 @@ import { Contract } from '../../contract/entities/contract.entity';
 import { Review } from '../../review/entities/review.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Favorite } from '../../favorite/entities/favorite.entity';
+import { Availability } from '../../availability/entities/availability.entity';
+import { Booking } from '../../booking/entities/booking.entity';
 
 @Entity()
 export class User {
@@ -126,4 +128,26 @@ export class User {
 
   @OneToMany(() => Favorite, (favorite) => favorite.user, { cascade: true })
   favorites: Favorite[];
+
+  @Column({ nullable: true })
+  profileImageUrl: string;
+
+  @Column({ nullable: true })
+  profileImagePublicId: string;
+
+  @ApiProperty({
+    description: 'Lista de disponibilidades del usuario',
+    type: [Availability],
+    required: false,
+  })
+  @OneToMany(() => Availability, (availability) => availability.user)
+  availabilities: Availability[];
+
+  @ApiProperty({
+    description: 'Lista de reservas realizadas por el usuario',
+    type: [Booking],
+    required: false,
+  })
+  @OneToMany(() => Booking, (booking) => booking.client)
+  bookings: Booking[];
 }
