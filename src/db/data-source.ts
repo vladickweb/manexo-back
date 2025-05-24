@@ -9,6 +9,8 @@ import { Review } from '../review/entities/review.entity';
 import { Favorite } from '../favorite/entities/favorite.entity';
 import { Availability } from '../availability/entities/availability.entity';
 import { Booking } from '../booking/entities/booking.entity';
+import { Message } from '@/messages/entities/message.entity';
+import { Chat } from '@/chats/entities/chat.entity';
 
 config();
 
@@ -29,6 +31,8 @@ export const dataSourceOptions: DataSourceOptions = {
     Favorite,
     Availability,
     Booking,
+    Chat,
+    Message,
   ],
   migrations: ['src/db/migrations/*.ts'],
   migrationsTableName: 'migrations',

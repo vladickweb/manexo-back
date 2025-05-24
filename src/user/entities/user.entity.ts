@@ -14,6 +14,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Favorite } from '../../favorite/entities/favorite.entity';
 import { Availability } from '../../availability/entities/availability.entity';
 import { Booking } from '../../booking/entities/booking.entity';
+import { Chat } from '../../chats/entities/chat.entity';
+import { Message } from '../../messages/entities/message.entity';
 
 @Entity()
 export class User {
@@ -150,4 +152,13 @@ export class User {
   })
   @OneToMany(() => Booking, (booking) => booking.client)
   bookings: Booking[];
+
+  @OneToMany(() => Chat, (chat) => chat.user)
+  chats: Chat[];
+
+  @OneToMany(() => Chat, (chat) => chat.serviceProvider)
+  serviceChats: Chat[];
+
+  @OneToMany(() => Message, (message) => message.sender)
+  messages: Message[];
 }

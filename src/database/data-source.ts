@@ -7,6 +7,8 @@ import { Subcategory } from '../category/entities/subcategory.entity';
 import { Contract } from '../contract/entities/contract.entity';
 import { Review } from '../review/entities/review.entity';
 import { Favorite } from '../favorite/entities/favorite.entity';
+import { Message } from '@/messages/entities/message.entity';
+import { Chat } from '@/chats/entities/chat.entity';
 
 config();
 
@@ -17,7 +19,17 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  entities: [User, Service, Category, Subcategory, Contract, Review, Favorite],
+  entities: [
+    User,
+    Service,
+    Category,
+    Subcategory,
+    Contract,
+    Review,
+    Favorite,
+    Chat,
+    Message,
+  ],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,
 });

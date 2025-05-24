@@ -12,6 +12,7 @@ import { Subcategory } from '../../category/entities/subcategory.entity';
 import { Contract } from '../../contract/entities/contract.entity';
 import { Review } from '../../review/entities/review.entity';
 import { Booking } from '../../booking/entities/booking.entity';
+import { Chat } from '../../chats/entities/chat.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
@@ -66,6 +67,9 @@ export class Service {
   })
   @OneToMany(() => Booking, (booking) => booking.service)
   bookings: Booking[];
+
+  @OneToMany(() => Chat, (chat) => chat.service)
+  chats: Chat[];
 
   @CreateDateColumn()
   createdAt: Date;

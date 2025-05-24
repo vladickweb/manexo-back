@@ -18,6 +18,7 @@ import dataSource from './db/data-source';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { BookingModule } from './booking/booking.module';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { BookingModule } from './booking/booking.module';
     CloudinaryModule,
     AvailabilityModule,
     BookingModule,
+    ChatsModule,
   ],
   providers: [],
 })

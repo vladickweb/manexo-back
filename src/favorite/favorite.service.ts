@@ -62,7 +62,7 @@ export class FavoriteService {
   async findByUser(userId: number) {
     return this.favoriteRepository.find({
       where: { user: { id: userId } },
-      relations: ['user', 'service'],
+      relations: ['user', 'service', 'service.user', 'service.subcategory'],
     });
   }
 
