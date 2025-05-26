@@ -1,9 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { json } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
 
   // Permitir múltiples orígenes: el local y el de producción en Vercel
   app.enableCors({
@@ -12,9 +15,18 @@ async function bootstrap() {
       'https://menexo-front-mctfrfo05-vladickwebs-projects.vercel.app',
     ],
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Authorization',
+    allowedHeaders: 'Content-Type,Authorization,stripe-signature',
     credentials: true,
   });
+
+  // Configurar el manejo del cuerpo de la solicitud
+  app.use(
+    json({
+      verify: (req: any, res, buf) => {
+        req.rawBody = buf;
+      },
+    }),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({

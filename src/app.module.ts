@@ -19,6 +19,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { BookingModule } from './booking/booking.module';
 import { ChatsModule } from './chats/chats.module';
+import { StripeModule } from '@/stripe/stripe.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ChatsModule } from './chats/chats.module';
     AvailabilityModule,
     BookingModule,
     ChatsModule,
+    StripeModule,
   ],
   providers: [],
 })

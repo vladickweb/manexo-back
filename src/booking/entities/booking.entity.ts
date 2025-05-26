@@ -10,15 +10,23 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../user/entities/user.entity';
 import { Availability } from '../../availability/entities/availability.entity';
 import { Service } from '../../service/entities/service.entity';
+import { Contract } from '../../contract/entities/contract.entity';
+
+export enum BookingStatus {
+  PENDING = 'pending',
+  CONFIRMED = 'confirmed',
+  CANCELLED = 'cancelled',
+  COMPLETED = 'completed',
+}
 
 @Entity()
 export class Booking {
   @ApiProperty({
     description: 'ID único de la reserva',
-    example: 1,
+    example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ApiProperty({
     description: 'Fecha de la reserva',
@@ -48,10 +56,10 @@ export class Booking {
   })
   @Column({
     type: 'enum',
-    enum: ['PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED'],
-    default: 'PENDING',
+    enum: BookingStatus,
+    default: BookingStatus.PENDING,
   })
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
+  status: BookingStatus;
 
   @ApiProperty({
     description: 'Usuario que realiza la reserva',
@@ -59,6 +67,13 @@ export class Booking {
   })
   @ManyToOne(() => User, (user) => user.bookings)
   client: User;
+
+  @ApiProperty({
+    description: 'Usuario que proporciona el servicio',
+    type: () => User,
+  })
+  @ManyToOne(() => User, (user) => user.providedServices)
+  provider: User;
 
   @ApiProperty({
     description: 'Disponibilidad asociada a la reserva',
@@ -75,6 +90,13 @@ export class Booking {
   service: Service;
 
   @ApiProperty({
+    description: 'Contrato asociado a la reserva',
+    type: () => Contract,
+  })
+  @ManyToOne(() => Contract, (contract) => contract.bookings)
+  contract: Contract;
+
+  @ApiProperty({
     description: 'Precio total de la reserva',
     example: 100.0,
   })
@@ -86,7 +108,7 @@ export class Booking {
     example: 'Por favor, traer productos de limpieza',
     required: false,
   })
-  @Column({ nullable: true })
+  @Column('text', { nullable: true })
   notes: string;
 
   @ApiProperty({

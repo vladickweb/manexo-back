@@ -9,6 +9,8 @@ import {
   UseGuards,
   Req,
   Query,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -27,6 +29,8 @@ import { User } from '../user/entities/user.entity';
 import { FilterServiceDto } from './dto/filter-service.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response.interface';
+import { ServiceAvailabilityResponse } from './interfaces/service-availability.interface';
+import { GetAvailabilityQueryDto } from '@/service/dto/get-availability-query.dto';
 
 @ApiTags('services')
 @ApiBearerAuth()
@@ -170,5 +174,32 @@ export class ServiceController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   findMyPublishedServices(@Req() req: Request) {
     return this.serviceService.findMyPublishedServices(req.user as User);
+  }
+
+  @Get(':id/availability')
+  @ApiOperation({
+    summary: 'Obtener disponibilidad de un servicio para una fecha específica',
+  })
+  @ApiQuery({
+    name: 'date',
+    required: false,
+    type: String,
+    description:
+      'Fecha de referencia para la semana en formato ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ). La semana va de lunes a domingo',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Disponibilidad del servicio',
+    type: ServiceAvailabilityResponse,
+  })
+  @ApiResponse({ status: 400, description: 'Formato de fecha inválido' })
+  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async getServiceAvailability(
+    @Param('id') id: string,
+    @Query() query: GetAvailabilityQueryDto,
+  ): Promise<ServiceAvailabilityResponse> {
+    const parsedDate = query.date ? new Date(query.date) : new Date();
+    return this.serviceService.getServiceAvailability(id, parsedDate);
   }
 }

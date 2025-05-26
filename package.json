@@ -15,6 +15,7 @@
     "infra:down": "docker-compose down postgres pgadmin",
     "infra:restart": "docker-compose down && docker-compose up -d postgres pgadmin",
     "infra:up": "docker-compose up -d postgres pgadmin",
+    "stripe:listen": "stripe listen --forward-to localhost:3000/contracts/webhook",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -70,6 +71,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "socket.io": "^4.8.1",
+    "stripe": "^18.1.1",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.22",
     "typeorm-extension": "^3.7.0"

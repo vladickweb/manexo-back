@@ -122,7 +122,7 @@ export class User {
   @OneToMany(() => Service, (service) => service.user)
   services: Service[];
 
-  @OneToMany(() => Contract, (contract) => contract.requester)
+  @OneToMany(() => Contract, (contract) => contract.client)
   contracts: Contract[];
 
   @OneToMany(() => Review, (review) => review.user)
@@ -152,6 +152,9 @@ export class User {
   })
   @OneToMany(() => Booking, (booking) => booking.client)
   bookings: Booking[];
+
+  @OneToMany(() => Booking, (booking) => booking.provider)
+  providedServices: Booking[];
 
   @OneToMany(() => Chat, (chat) => chat.user)
   chats: Chat[];

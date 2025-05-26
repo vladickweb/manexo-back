@@ -732,6 +732,57 @@
         ]
       }
     },
+    "/services/{id}/availability": {
+      "get": {
+        "operationId": "ServiceController_getServiceAvailability",
+        "summary": "Obtener disponibilidad de un servicio para una fecha específica",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "date",
+            "required": false,
+            "in": "query",
+            "description": "Fecha de referencia para la semana en formato ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ). La semana va de lunes a domingo",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Disponibilidad del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceAvailabilityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Formato de fecha inválido"
+          },
+          "404": {
+            "description": "Servicio no encontrado"
+          }
+        },
+        "tags": [
+          "services"
+        ],
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
     "/categories": {
       "post": {
         "operationId": "CategoryController_create",
@@ -916,7 +967,7 @@
         ]
       }
     },
-    "/contract": {
+    "/contracts": {
       "post": {
         "operationId": "ContractController_create",
         "parameters": [],
@@ -946,7 +997,38 @@
         }
       }
     },
-    "/contract/{id}": {
+    "/contracts/my-contracts": {
+      "get": {
+        "operationId": "ContractController_getMyContracts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/contracts/webhook": {
+      "post": {
+        "operationId": "ContractController_handleWebhook",
+        "parameters": [
+          {
+            "name": "stripe-signature",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/contracts/{id}": {
       "get": {
         "operationId": "ContractController_findOne",
         "parameters": [
@@ -1817,13 +1899,17 @@
           "updatedAt"
         ]
       },
+      "Contract": {
+        "type": "object",
+        "properties": {}
+      },
       "Booking": {
         "type": "object",
         "properties": {
           "id": {
-            "type": "number",
+            "type": "string",
             "description": "ID único de la reserva",
-            "example": 1
+            "example": "123e4567-e89b-12d3-a456-426614174000"
           },
           "date": {
             "format": "date-time",
@@ -1860,6 +1946,14 @@
               }
             ]
           },
+          "provider": {
+            "description": "Usuario que proporciona el servicio",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
           "availability": {
             "description": "Disponibilidad asociada a la reserva",
             "allOf": [
@@ -1873,6 +1967,14 @@
             "allOf": [
               {
                 "$ref": "#/components/schemas/Service"
+              }
+            ]
+          },
+          "contract": {
+            "description": "Contrato asociado a la reserva",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Contract"
               }
             ]
           },
@@ -1906,8 +2008,10 @@
           "endTime",
           "status",
           "client",
+          "provider",
           "availability",
           "service",
+          "contract",
           "totalPrice",
           "createdAt",
           "updatedAt"
@@ -2236,6 +2340,121 @@
             }
           }
         }
+      },
+      "AvailableSlot": {
+        "type": "object",
+        "properties": {
+          "start": {
+            "type": "string",
+            "example": "09:00",
+            "description": "Hora de inicio del slot"
+          },
+          "end": {
+            "type": "string",
+            "example": "10:00",
+            "description": "Hora de fin del slot"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ]
+      },
+      "DayAvailability": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-05-23T00:00:00.000Z",
+            "description": "Fecha del día"
+          },
+          "dayOfWeek": {
+            "type": "number",
+            "example": 1,
+            "description": "Día de la semana (0-6, donde 0 es domingo)"
+          },
+          "startTime": {
+            "type": "string",
+            "example": "09:00",
+            "description": "Hora de inicio de la disponibilidad"
+          },
+          "endTime": {
+            "type": "string",
+            "example": "17:00",
+            "description": "Hora de fin de la disponibilidad"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true,
+            "description": "Indica si la disponibilidad está activa"
+          },
+          "availableSlots": {
+            "description": "Slots disponibles",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailableSlot"
+            }
+          }
+        },
+        "required": [
+          "date",
+          "dayOfWeek",
+          "startTime",
+          "endTime",
+          "isActive",
+          "availableSlots"
+        ]
+      },
+      "ServiceAvailabilityResponse": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "number",
+            "example": 1,
+            "description": "ID del servicio"
+          },
+          "serviceName": {
+            "type": "string",
+            "example": "Servicio de limpieza",
+            "description": "Nombre del servicio"
+          },
+          "provider": {
+            "type": "object",
+            "example": {
+              "id": 1,
+              "name": "Juan Pérez"
+            },
+            "description": "Información del proveedor del servicio"
+          },
+          "weekStart": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-05-20T00:00:00.000Z",
+            "description": "Fecha de inicio de la semana"
+          },
+          "weekEnd": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2024-05-26T00:00:00.000Z",
+            "description": "Fecha de fin de la semana"
+          },
+          "weekAvailability": {
+            "description": "Disponibilidades por día de la semana",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DayAvailability"
+            }
+          }
+        },
+        "required": [
+          "serviceId",
+          "serviceName",
+          "provider",
+          "weekStart",
+          "weekEnd",
+          "weekAvailability"
+        ]
       },
       "CreateCategoryDto": {
         "type": "object",

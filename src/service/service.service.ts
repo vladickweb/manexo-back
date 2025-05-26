@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
@@ -8,12 +8,22 @@ import { FilterServiceDto } from './dto/filter-service.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { User } from '../user/entities/user.entity';
 import { PaginatedResponse } from '../common/interfaces/paginated-response.interface';
+import { Booking } from '../booking/entities/booking.entity';
+import { Availability } from '../availability/entities/availability.entity';
+import {
+  ServiceAvailabilityResponse,
+  DayAvailability,
+  AvailableSlot,
+} from './interfaces/service-availability.interface';
+import { BookingStatus } from '../booking/entities/booking.entity';
 
 @Injectable()
 export class ServiceService {
   constructor(
     @InjectRepository(Service)
     private serviceRepository: Repository<Service>,
+    @InjectRepository(Booking)
+    private bookingRepository: Repository<Booking>,
   ) {}
 
   async create(
@@ -34,7 +44,7 @@ export class ServiceService {
     lat2: number,
     lon2: number,
   ): number {
-    const R = 6371e3; // Radio de la Tierra en metros
+    const R = 6371e3;
     const φ1 = (lat1 * Math.PI) / 180;
     const φ2 = (lat2 * Math.PI) / 180;
     const Δφ = ((lat2 - lat1) * Math.PI) / 180;
@@ -45,7 +55,7 @@ export class ServiceService {
       Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return R * c; // Distancia en metros
+    return R * c;
   }
 
   async findAll(
@@ -87,15 +97,12 @@ export class ServiceService {
       }
     }
 
-    // Obtener el total de registros
     const total = await queryBuilder.getCount();
 
-    // Aplicar paginación
     queryBuilder.skip(skip).take(limit);
 
     const services = await queryBuilder.getMany();
 
-    // Si se proporcionan coordenadas y radio, filtrar por distancia
     let filteredServices = services;
     if (filters?.latitude && filters?.longitude && filters?.radius) {
       filteredServices = services
@@ -127,14 +134,152 @@ export class ServiceService {
     };
   }
 
-  async findOne(id: string): Promise<Service> {
+  private getWeekDates(date: Date): { start: Date; end: Date } {
+    const localDate = new Date(date);
+
+    const isoDay = localDate.getDay() === 0 ? 7 : localDate.getDay();
+    const start = new Date(localDate);
+    start.setDate(localDate.getDate() - (isoDay - 1));
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+
+    return { start, end };
+  }
+
+  private async getAvailableSlots(
+    availabilities: Availability[],
+    bookings: Booking[],
+    date: Date,
+  ): Promise<AvailableSlot[]> {
+    const dayOfWeek = date.getDay();
+    const availability = availabilities.find(
+      (avail) => avail.dayOfWeek === dayOfWeek && avail.isActive,
+    );
+
+    if (!availability) {
+      return [];
+    }
+
+    const dayBookings = bookings.filter((booking) => {
+      const bookingDate = new Date(booking.date);
+      const targetDate = new Date(date);
+
+      const isSameDay =
+        bookingDate.getFullYear() === targetDate.getFullYear() &&
+        bookingDate.getMonth() === targetDate.getMonth() &&
+        bookingDate.getDate() === targetDate.getDate() &&
+        booking.status === BookingStatus.CONFIRMED;
+
+      return isSameDay;
+    });
+
+    return this.calculateAvailableSlots(availability, dayBookings);
+  }
+
+  private calculateAvailableSlots(
+    availability: Availability,
+    bookings: Booking[],
+  ): AvailableSlot[] {
+    const slots: AvailableSlot[] = [];
+    let currentTime = new Date(`2000-01-01T${availability.startTime}`);
+    const endTime = new Date(`2000-01-01T${availability.endTime}`);
+
+    const sortedBookings = bookings.sort((a, b) => {
+      const timeA = new Date(`2000-01-01T${a.startTime}`).getTime();
+      const timeB = new Date(`2000-01-01T${b.startTime}`).getTime();
+      return timeA - timeB;
+    });
+
+    const splitIntoHourlySlots = (start: Date, end: Date) => {
+      const hourlySlots: AvailableSlot[] = [];
+      let slotStart = new Date(start);
+
+      while (slotStart < end) {
+        const slotEnd = new Date(slotStart);
+        slotEnd.setHours(slotStart.getHours() + 1);
+
+        if (slotEnd > end) {
+          slotEnd.setTime(end.getTime());
+        }
+
+        hourlySlots.push({
+          start: slotStart.toTimeString().slice(0, 5),
+          end: slotEnd.toTimeString().slice(0, 5),
+        });
+
+        slotStart = new Date(slotEnd);
+      }
+
+      return hourlySlots;
+    };
+
+    for (const booking of sortedBookings) {
+      const bookingStart = new Date(`2000-01-01T${booking.startTime}`);
+      const bookingEnd = new Date(`2000-01-01T${booking.endTime}`);
+
+      if (currentTime < bookingStart) {
+        const newSlots = splitIntoHourlySlots(currentTime, bookingStart);
+        slots.push(...newSlots);
+      }
+
+      currentTime = bookingEnd;
+    }
+
+    if (currentTime < endTime) {
+      const remainingSlots = splitIntoHourlySlots(currentTime, endTime);
+      slots.push(...remainingSlots);
+    }
+
+    return slots;
+  }
+
+  async findOne(id: string, date?: Date): Promise<Service> {
     const service = await this.serviceRepository.findOne({
       where: { id: Number(id) },
-      relations: ['user'],
+      relations: [
+        'user',
+        'subcategory',
+        'subcategory.category',
+        'reviews',
+        'user.availabilities',
+      ],
     });
 
     if (!service) {
       throw new NotFoundException('Servicio no encontrado');
+    }
+
+    if (date) {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      const bookings = await this.bookingRepository.find({
+        where: {
+          service: { id: service.id },
+          startTime: Between(startOfDay.toISOString(), endOfDay.toISOString()),
+        },
+      });
+
+      const availableSlots = await this.getAvailableSlots(
+        service.user.availabilities,
+        bookings,
+        date,
+      );
+
+      service.user.availabilities = service.user.availabilities.map(
+        (avail) => ({
+          ...avail,
+          availableSlots: availableSlots.filter(
+            (slot) => slot.start === avail.startTime,
+          ),
+        }),
+      );
     }
 
     return service;
@@ -160,5 +305,68 @@ export class ServiceService {
       where: { user: { id: user.id } },
       relations: ['user', 'subcategory', 'subcategory.category'],
     });
+  }
+
+  async getServiceAvailability(
+    id: string,
+    date: Date,
+  ): Promise<ServiceAvailabilityResponse> {
+    const service = await this.serviceRepository.findOne({
+      where: { id: Number(id) },
+      relations: ['user', 'user.availabilities'],
+    });
+
+    if (!service) {
+      throw new NotFoundException('Servicio no encontrado');
+    }
+
+    const { start: weekStart, end: weekEnd } = this.getWeekDates(date);
+
+    const bookings = await this.bookingRepository.find({
+      where: {
+        service: { id: service.id },
+        date: Between(weekStart, weekEnd),
+      },
+    });
+
+    const weekAvailability: DayAvailability[] = [];
+    const currentDate = new Date(weekStart);
+
+    while (currentDate <= weekEnd) {
+      const dayAvailability = service.user.availabilities.find(
+        (avail) => avail.dayOfWeek === currentDate.getDay(),
+      );
+
+      if (dayAvailability && dayAvailability.isActive) {
+        const availableSlots = await this.getAvailableSlots(
+          service.user.availabilities,
+          bookings,
+          currentDate,
+        );
+
+        weekAvailability.push({
+          date: new Date(currentDate),
+          dayOfWeek: currentDate.getDay(),
+          startTime: dayAvailability.startTime,
+          endTime: dayAvailability.endTime,
+          isActive: dayAvailability.isActive,
+          availableSlots,
+        });
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return {
+      serviceId: service.id,
+      serviceName: service.description,
+      provider: {
+        id: service.user.id,
+        name: `${service.user.firstName} ${service.user.lastName}`,
+      },
+      weekStart: new Date(weekStart),
+      weekEnd: new Date(weekEnd),
+      weekAvailability,
+    };
   }
 }
