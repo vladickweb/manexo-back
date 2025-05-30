@@ -1,28 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsOptional,
-  IsNumber,
-  IsBoolean,
-  IsArray,
-  IsString,
-} from 'class-validator';
+import { IsOptional, IsNumber, IsBoolean, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
+import { PaginationDto } from '@/service/dto/pagination.dto';
 
-export class FilterServiceDto {
+export class FilterServiceDto extends PaginationDto {
   @ApiProperty({
-    description: 'IDs de las categorías',
+    description: 'IDs de las subcategorías',
     required: false,
-    type: [String],
+    type: [Number],
     isArray: true,
   })
   @IsArray()
-  @IsString({ each: true })
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
   @IsOptional()
-  categoryIds?: string[];
+  subcategoryIds?: number[];
+
+  @ApiProperty({
+    description: 'ID de la categoría',
+    required: false,
+    type: Number,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  categoryId?: number;
 
   @ApiProperty({
     description: 'Precio mínimo',
     required: false,
+    type: Number,
   })
   @IsNumber()
   @Type(() => Number)
@@ -32,6 +39,7 @@ export class FilterServiceDto {
   @ApiProperty({
     description: 'Precio máximo',
     required: false,
+    type: Number,
   })
   @IsNumber()
   @Type(() => Number)
@@ -39,18 +47,10 @@ export class FilterServiceDto {
   maxPrice?: number;
 
   @ApiProperty({
-    description: 'Estado activo del servicio',
-    required: false,
-  })
-  @IsBoolean()
-  @Type(() => Boolean)
-  @IsOptional()
-  isActive?: boolean;
-
-  @ApiProperty({
     description: 'Latitud del usuario',
     required: false,
     example: 37.62332465580069,
+    type: Number,
   })
   @IsNumber()
   @Type(() => Number)
@@ -61,6 +61,7 @@ export class FilterServiceDto {
     description: 'Longitud del usuario',
     required: false,
     example: -0.9851654443962178,
+    type: Number,
   })
   @IsNumber()
   @Type(() => Number)
@@ -68,12 +69,32 @@ export class FilterServiceDto {
   longitude?: number;
 
   @ApiProperty({
-    description: 'Radio de búsqueda en metros',
+    description: 'Filtrar solo servicios activos (true) o todos (false)',
     required: false,
-    example: 5000,
+    type: Boolean,
+  })
+  @IsBoolean()
+  @Type(() => Boolean)
+  @IsOptional()
+  onlyActives?: boolean;
+
+  @ApiProperty({
+    description: 'Número de elementos por página',
+    required: false,
+    type: Number,
   })
   @IsNumber()
   @Type(() => Number)
   @IsOptional()
-  radius?: number;
+  limit?: number;
+
+  @ApiProperty({
+    description: 'Número de página',
+    required: false,
+    type: Number,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  page?: number;
 }

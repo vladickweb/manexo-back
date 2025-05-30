@@ -20,6 +20,7 @@ import { AvailabilityModule } from './availability/availability.module';
 import { BookingModule } from './booking/booking.module';
 import { ChatsModule } from './chats/chats.module';
 import { StripeModule } from '@/stripe/stripe.module';
+import { UserLocationModule } from './user-location/user-location.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { StripeModule } from '@/stripe/stripe.module';
     BookingModule,
     ChatsModule,
     StripeModule,
+    UserLocationModule,
   ],
   providers: [],
 })

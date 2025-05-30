@@ -26,19 +26,6 @@ export class Service {
   @Column('int')
   radius: number;
 
-  @Column('json')
-  location: {
-    latitude: number;
-    longitude: number;
-    address: string;
-    streetName: string;
-    streetNumber: string;
-    city: string;
-    province: string;
-    postalCode: string;
-    country: string;
-  };
-
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 

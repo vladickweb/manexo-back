@@ -27,7 +27,6 @@ import { Service } from './entities/service.entity';
 import { Request } from 'express';
 import { User } from '../user/entities/user.entity';
 import { FilterServiceDto } from './dto/filter-service.dto';
-import { PaginationDto } from './dto/pagination.dto';
 import { PaginatedResponse } from '../common/interfaces/paginated-response.interface';
 import { ServiceAvailabilityResponse } from './interfaces/service-availability.interface';
 import { GetAvailabilityQueryDto } from '@/service/dto/get-availability-query.dto';
@@ -55,15 +54,26 @@ export class ServiceController {
   @Get()
   @ApiOperation({ summary: 'Obtener todos los servicios' })
   @ApiQuery({
-    name: 'categoryIds',
+    name: 'subcategoryIds',
     required: false,
-    type: [String],
+    type: [Number],
     isArray: true,
-    description: 'IDs de las categorías a filtrar',
+    description: 'IDs de las subcategorías a filtrar',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    type: Number,
+    description: 'ID de la categoría a filtrar',
   })
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
-  @ApiQuery({ name: 'isActive', required: false, type: Boolean })
+  @ApiQuery({
+    name: 'onlyActives',
+    required: false,
+    type: Boolean,
+    description: 'Filtrar solo servicios activos (true) o todos (false)',
+  })
   @ApiQuery({
     name: 'latitude',
     required: false,
@@ -115,11 +125,17 @@ export class ServiceController {
       },
     },
   })
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
   findAll(
-    @Query() filters?: FilterServiceDto,
-    @Query() pagination?: PaginationDto,
+    @Query() filters: FilterServiceDto,
   ): Promise<PaginatedResponse<Service>> {
-    return this.serviceService.findAll(filters, pagination);
+    return this.serviceService.findAll(filters);
   }
 
   @Get(':id')

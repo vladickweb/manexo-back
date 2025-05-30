@@ -6,8 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
-  Request,
   UseInterceptors,
   UploadedFile,
   ParseIntPipe,
@@ -16,7 +14,6 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -26,7 +23,6 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 
@@ -61,22 +57,6 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found.' })
   findOne(@Param('id') id: string) {
     return this.userService.findById(id);
-  }
-
-  @Patch('location')
-  @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Update authenticated user location' })
-  @ApiResponse({
-    status: 200,
-    description: 'The user location has been successfully updated.',
-    type: User,
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  updateLocation(@Body() updateLocationDto: UpdateLocationDto, @Request() req) {
-    return this.userService.updateLocation(
-      req.user.id.toString(),
-      updateLocationDto,
-    );
   }
 
   @Patch('test')

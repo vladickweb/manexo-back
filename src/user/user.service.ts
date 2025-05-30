@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdateLocationDto } from './dto/update-location.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Injectable()
@@ -29,7 +28,10 @@ export class UserService {
   }
 
   async findById(id: string): Promise<User | null> {
-    return await this.userRepository.findOne({ where: { id: Number(id) } });
+    return await this.userRepository.findOne({
+      where: { id: Number(id) },
+      relations: ['location'],
+    });
   }
 
   async update(
@@ -37,16 +39,6 @@ export class UserService {
     updateUserDto: Partial<UpdateUserDto>,
   ): Promise<User | null> {
     await this.userRepository.update(id, updateUserDto);
-    return await this.findById(id);
-  }
-
-  async updateLocation(
-    id: string,
-    updateLocationDto: UpdateLocationDto,
-  ): Promise<User | null> {
-    await this.userRepository.update(id, {
-      location: updateLocationDto.location,
-    });
     return await this.findById(id);
   }
 
@@ -61,15 +53,12 @@ export class UserService {
       throw new NotFoundException('Usuario no encontrado');
     }
 
-    // Si el usuario ya tiene una imagen, la eliminamos de Cloudinary
     if (user.profileImagePublicId) {
       await this.cloudinaryService.deleteImage(user.profileImagePublicId);
     }
 
-    // Subimos la nueva imagen
     const result = await this.cloudinaryService.uploadImage(file);
 
-    // Actualizamos el usuario con la nueva información de la imagen
     user.profileImageUrl = result['secure_url'];
     user.profileImagePublicId = result['public_id'];
 

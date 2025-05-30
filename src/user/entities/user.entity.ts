@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Service } from '../../service/entities/service.entity';
@@ -16,6 +17,7 @@ import { Availability } from '../../availability/entities/availability.entity';
 import { Booking } from '../../booking/entities/booking.entity';
 import { Chat } from '../../chats/entities/chat.entity';
 import { Message } from '../../messages/entities/message.entity';
+import { UserLocation } from '../../user-location/entities/user-location.entity';
 
 @Entity()
 export class User {
@@ -64,34 +66,6 @@ export class User {
   })
   @Column({ nullable: true })
   avatar: string;
-
-  @ApiProperty({
-    description: 'Ubicación del usuario',
-    required: false,
-    example: {
-      latitude: 19.4326,
-      longitude: -99.1332,
-      address: 'Avenida Reforma 123, Ciudad de México',
-      streetName: 'Avenida Reforma',
-      streetNumber: '123',
-      city: 'Ciudad de México',
-      province: 'CDMX',
-      postalCode: '06500',
-      country: 'México',
-    },
-  })
-  @Column('json', { nullable: true })
-  location: {
-    latitude: number;
-    longitude: number;
-    address: string;
-    streetName: string;
-    streetNumber: string;
-    city: string;
-    province: string;
-    postalCode: string;
-    country: string;
-  };
 
   @ApiProperty({
     description: 'Estado activo del usuario',
@@ -164,4 +138,9 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.sender)
   messages: Message[];
+
+  @OneToOne(() => UserLocation, (location) => location.user, {
+    cascade: true,
+  })
+  location: UserLocation;
 }

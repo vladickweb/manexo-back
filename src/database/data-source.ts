@@ -9,6 +9,7 @@ import { Review } from '../review/entities/review.entity';
 import { Favorite } from '../favorite/entities/favorite.entity';
 import { Message } from '@/messages/entities/message.entity';
 import { Chat } from '@/chats/entities/chat.entity';
+import { UserLocation } from '@/user-location/entities/user-location.entity';
 
 config();
 
@@ -29,6 +30,7 @@ export const AppDataSource = new DataSource({
     Favorite,
     Chat,
     Message,
+    UserLocation,
   ],
   migrations: ['src/database/migrations/*.ts'],
   synchronize: false,

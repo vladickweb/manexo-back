@@ -11,6 +11,7 @@ import { Availability } from '../availability/entities/availability.entity';
 import { Booking } from '../booking/entities/booking.entity';
 import { Message } from '@/messages/entities/message.entity';
 import { Chat } from '@/chats/entities/chat.entity';
+import { UserLocation } from '@/user-location/entities/user-location.entity';
 
 config();
 
@@ -33,6 +34,7 @@ export const dataSourceOptions: DataSourceOptions = {
     Booking,
     Chat,
     Message,
+    UserLocation,
   ],
   migrations: ['src/db/migrations/*.ts'],
   migrationsTableName: 'migrations',

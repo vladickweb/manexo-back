@@ -5,7 +5,6 @@ import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { FilterServiceDto } from './dto/filter-service.dto';
-import { PaginationDto } from './dto/pagination.dto';
 import { User } from '../user/entities/user.entity';
 import { PaginatedResponse } from '../common/interfaces/paginated-response.interface';
 import { Booking } from '../booking/entities/booking.entity';
@@ -24,6 +23,8 @@ export class ServiceService {
     private serviceRepository: Repository<Service>,
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async create(
@@ -60,24 +61,31 @@ export class ServiceService {
   }
 
   async findAll(
-    filters?: FilterServiceDto,
-    pagination?: PaginationDto,
+    filters: FilterServiceDto,
   ): Promise<PaginatedResponse<Service>> {
-    const { page = 1, limit = 10 } = pagination || {};
+    const { page = 1, limit = 10 } = filters;
     const skip = (page - 1) * limit;
 
     const queryBuilder = this.serviceRepository
       .createQueryBuilder('service')
-      .leftJoinAndSelect('service.user', 'user')
+      .distinct(true)
       .leftJoinAndSelect('service.subcategory', 'subcategory')
       .leftJoinAndSelect('subcategory.category', 'category')
       .leftJoinAndSelect('service.reviews', 'reviews')
-      .leftJoinAndSelect('reviews.user', 'reviewUser');
+      .leftJoin('reviews.user', 'reviewUser')
+      .leftJoinAndSelect('service.user', 'user')
+      .leftJoinAndSelect('user.location', 'location');
 
     if (filters) {
-      if (filters.categoryIds?.length > 0) {
-        queryBuilder.andWhere('subcategory.categoryId IN (:...categoryIds)', {
-          categoryIds: filters.categoryIds,
+      if (filters.subcategoryIds?.length > 0) {
+        queryBuilder.andWhere('service.subcategoryId IN (:...subcategoryIds)', {
+          subcategoryIds: filters.subcategoryIds,
+        });
+      }
+
+      if (filters.categoryId !== undefined) {
+        queryBuilder.andWhere('subcategory.categoryId = :categoryId', {
+          categoryId: filters.categoryId,
         });
       }
 
@@ -93,36 +101,35 @@ export class ServiceService {
         });
       }
 
-      if (filters.isActive !== undefined) {
+      if (filters.onlyActives === true) {
         queryBuilder.andWhere('service.isActive = :isActive', {
-          isActive: filters.isActive,
+          isActive: true,
         });
       }
     }
-
-    const total = await queryBuilder.getCount();
 
     queryBuilder.skip(skip).take(limit);
 
     const services = await queryBuilder.getMany();
 
     let filteredServices = services;
-    if (filters?.latitude && filters?.longitude && filters?.radius) {
-      filteredServices = services
-        .filter((service) => {
-          if (!service.user?.location) return false;
 
+    const totalFiltered = filteredServices.length;
+
+    if (filters?.latitude && filters?.longitude) {
+      for (const service of filteredServices) {
+        if (service.user?.location) {
           const distance = this.calculateDistance(
             filters.latitude,
             filters.longitude,
             service.user.location.latitude,
             service.user.location.longitude,
           );
-
           service['distance'] = Math.round(distance);
-
-          return distance <= filters.radius;
-        })
+        }
+      }
+      filteredServices = filteredServices
+        .filter((s) => s['distance'] !== undefined)
         .sort((a, b) => a['distance'] - b['distance']);
     }
 
@@ -146,10 +153,10 @@ export class ServiceService {
     return {
       data: servicesWithStats,
       meta: {
-        total,
+        total: totalFiltered,
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages: Math.ceil(totalFiltered / limit),
       },
     };
   }
@@ -265,6 +272,7 @@ export class ServiceService {
         'subcategory.category',
         'reviews',
         'user.availabilities',
+        'user.location',
       ],
     });
 
@@ -329,6 +337,7 @@ export class ServiceService {
         'subcategory.category',
         'reviews',
         'reviews.user',
+        'user.location',
       ],
     });
 
