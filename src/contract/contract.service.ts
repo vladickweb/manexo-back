@@ -149,8 +149,17 @@ export class ContractService {
   }
 
   async findByUserId(userId: number) {
-    return await this.contractRepository.find({
-      where: [{ client: { id: userId } }, { provider: { id: userId } }],
+    const contracts = await this.contractRepository.find({
+      where: [
+        {
+          client: { id: userId },
+          status: ContractStatus.PAID,
+        },
+        {
+          provider: { id: userId },
+          status: ContractStatus.PAID,
+        },
+      ],
       relations: [
         'service',
         'service.user',
@@ -158,10 +167,34 @@ export class ContractService {
         'provider',
         'service.subcategory',
         'service.subcategory.category',
+        'bookings',
+        'service.reviews',
+        'service.reviews.user',
       ],
       order: {
         createdAt: 'DESC',
       },
+    });
+
+    return contracts.map((contract) => {
+      // Solo el cliente puede dejar review
+      const canReview = contract.client.id === userId;
+
+      // Verificar si ya ha dejado review para este servicio
+      const hasReviewed = contract.service.reviews.some(
+        (review) => review.user?.id === userId,
+      );
+
+      return {
+        ...contract,
+        timeSlots: contract.bookings.map((booking) => ({
+          date: booking.date,
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          status: booking.status,
+        })),
+        canReview: canReview && !hasReviewed,
+      };
     });
   }
 

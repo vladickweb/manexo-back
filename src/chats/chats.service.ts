@@ -54,8 +54,12 @@ export class ChatsService {
   }
 
   async getChatsByUser(userId: number): Promise<Chat[]> {
+    if (!userId) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
     return this.chatRepository.find({
-      where: [{ user: { id: userId } }, { serviceProvider: { id: userId } }],
+      // where: [{ user: { id: userId } }, { serviceProvider: { id: userId } }],
       relations: ['user', 'serviceProvider', 'service', 'messages'],
       order: {
         updatedAt: 'DESC',

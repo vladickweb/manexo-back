@@ -121,12 +121,12 @@ export class CreateServiceDto {
   price: number;
 
   @ApiProperty({
-    description: 'ID de la categoría a la que pertenece el servicio',
+    description: 'ID de la subcategoría a la que pertenece el servicio',
     example: 1,
   })
   @IsNumber()
   @IsNotEmpty()
-  categoryId: number;
+  subcategory: number;
 
   @ApiProperty({
     description: 'Indica si el servicio requiere aceptación manual',
@@ -136,16 +136,6 @@ export class CreateServiceDto {
   @IsBoolean()
   @IsOptional()
   requiresAcceptance?: boolean;
-
-  @ApiProperty({
-    description: 'Lista de IDs de subcategorías',
-    example: [1, 2],
-    required: false,
-  })
-  @IsArray()
-  @IsNumber({}, { each: true })
-  @IsOptional()
-  subcategoryIds?: number[];
 
   @ApiProperty({
     description: 'Lista de URLs de imágenes del servicio',

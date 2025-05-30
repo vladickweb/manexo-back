@@ -32,7 +32,8 @@ export class ServiceService {
   ): Promise<Service> {
     const service = this.serviceRepository.create({
       ...createServiceDto,
-      user,
+      user: { id: user.id },
+      subcategory: { id: createServiceDto.subcategory },
     });
 
     return await this.serviceRepository.save(service);
@@ -69,7 +70,9 @@ export class ServiceService {
       .createQueryBuilder('service')
       .leftJoinAndSelect('service.user', 'user')
       .leftJoinAndSelect('service.subcategory', 'subcategory')
-      .leftJoinAndSelect('subcategory.category', 'category');
+      .leftJoinAndSelect('subcategory.category', 'category')
+      .leftJoinAndSelect('service.reviews', 'reviews')
+      .leftJoinAndSelect('reviews.user', 'reviewUser');
 
     if (filters) {
       if (filters.categoryIds?.length > 0) {
@@ -123,8 +126,25 @@ export class ServiceService {
         .sort((a, b) => a['distance'] - b['distance']);
     }
 
+    const servicesWithStats = filteredServices.map((service) => {
+      const totalReviews = service.reviews.length;
+      const averageRating =
+        totalReviews > 0
+          ? service.reviews.reduce((acc, review) => acc + review.rating, 0) /
+            totalReviews
+          : 0;
+
+      return {
+        ...service,
+        reviewStats: {
+          totalReviews,
+          averageRating: Number(averageRating.toFixed(1)),
+        },
+      };
+    });
+
     return {
-      data: filteredServices,
+      data: servicesWithStats,
       meta: {
         total,
         page,
@@ -301,9 +321,32 @@ export class ServiceService {
   }
 
   async findMyPublishedServices(user: User): Promise<Service[]> {
-    return await this.serviceRepository.find({
+    const services = await this.serviceRepository.find({
       where: { user: { id: user.id } },
-      relations: ['user', 'subcategory', 'subcategory.category'],
+      relations: [
+        'user',
+        'subcategory',
+        'subcategory.category',
+        'reviews',
+        'reviews.user',
+      ],
+    });
+
+    return services.map((service) => {
+      const totalReviews = service.reviews.length;
+      const averageRating =
+        totalReviews > 0
+          ? service.reviews.reduce((acc, review) => acc + review.rating, 0) /
+            totalReviews
+          : 0;
+
+      return {
+        ...service,
+        reviewStats: {
+          totalReviews,
+          averageRating: Number(averageRating.toFixed(1)),
+        },
+      };
     });
   }
 

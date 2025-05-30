@@ -3,14 +3,12 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToOne,
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { Service } from '../../service/entities/service.entity';
-import { Review } from '../../review/entities/review.entity';
 import { Booking } from '../../booking/entities/booking.entity';
 
 export enum ContractStatus {
@@ -35,9 +33,6 @@ export class Contract {
 
   @ManyToOne(() => Service)
   service: Service;
-
-  @OneToOne(() => Review, (review) => review.contract)
-  review: Review;
 
   @OneToMany(() => Booking, (booking) => booking.contract)
   bookings: Booking[];

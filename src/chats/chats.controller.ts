@@ -23,7 +23,7 @@ export class ChatsController {
 
   @Get()
   async findAll(@Request() req) {
-    return this.chatsService.getChatsByUser(req.user.sub);
+    return this.chatsService.getChatsByUser(req.user.id);
   }
 
   @Get(':id')

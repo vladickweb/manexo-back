@@ -1094,9 +1094,10 @@
         }
       }
     },
-    "/review": {
+    "/reviews": {
       "post": {
         "operationId": "ReviewController_create",
+        "summary": "Crear una nueva review",
         "parameters": [],
         "requestBody": {
           "required": true,
@@ -1110,69 +1111,25 @@
         },
         "responses": {
           "201": {
-            "description": ""
-          }
-        }
-      },
-      "get": {
-        "operationId": "ReviewController_findAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/review/{id}": {
-      "get": {
-        "operationId": "ReviewController_findOne",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "ReviewController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateReviewDto"
+            "description": "La review ha sido creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
               }
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "operationId": "ReviewController_remove",
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/service/{id}": {
+      "get": {
+        "operationId": "ReviewController_findByServiceId",
+        "summary": "Obtener todas las reviews de un servicio",
         "parameters": [
           {
             "name": "id",
@@ -1185,9 +1142,132 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Lista de reviews del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Review"
+                  }
+                }
+              }
+            }
           }
-        }
+        },
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/user/{id}": {
+      "get": {
+        "operationId": "ReviewController_findByUserId",
+        "summary": "Obtener todas las reviews de un usuario",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de reviews del usuario",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Review"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "reviews"
+        ]
+      }
+    },
+    "/reviews/service/{id}/stats": {
+      "get": {
+        "operationId": "ReviewController_getServiceReviewStats",
+        "summary": "Obtener estadísticas de reviews de un servicio",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estadísticas de reviews del servicio",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalReviews": {
+                      "type": "number",
+                      "description": "Número total de reviews"
+                    },
+                    "averageRating": {
+                      "type": "number",
+                      "description": "Promedio de puntuaciones (1-5)"
+                    },
+                    "reviews": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "rating": {
+                            "type": "number"
+                          },
+                          "comment": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "number"
+                              },
+                              "firstName": {
+                                "type": "string"
+                              },
+                              "lastName": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "reviews"
+        ]
       }
     },
     "/favorites": {
@@ -2242,26 +2322,15 @@
             "description": "Precio del servicio",
             "example": 500
           },
-          "categoryId": {
+          "subcategory": {
             "type": "number",
-            "description": "ID de la categoría a la que pertenece el servicio",
+            "description": "ID de la subcategoría a la que pertenece el servicio",
             "example": 1
           },
           "requiresAcceptance": {
             "type": "boolean",
             "description": "Indica si el servicio requiere aceptación manual",
             "example": false
-          },
-          "subcategoryIds": {
-            "description": "Lista de IDs de subcategorías",
-            "example": [
-              1,
-              2
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           },
           "images": {
             "description": "Lista de URLs de imágenes del servicio",
@@ -2279,7 +2348,7 @@
           "radius",
           "location",
           "price",
-          "categoryId"
+          "subcategory"
         ]
       },
       "UpdateServiceDto": {
@@ -2308,26 +2377,15 @@
             "description": "Precio del servicio",
             "example": 500
           },
-          "categoryId": {
+          "subcategory": {
             "type": "number",
-            "description": "ID de la categoría a la que pertenece el servicio",
+            "description": "ID de la subcategoría a la que pertenece el servicio",
             "example": 1
           },
           "requiresAcceptance": {
             "type": "boolean",
             "description": "Indica si el servicio requiere aceptación manual",
             "example": false
-          },
-          "subcategoryIds": {
-            "description": "Lista de IDs de subcategorías",
-            "example": [
-              1,
-              2
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           },
           "images": {
             "description": "Lista de URLs de imágenes del servicio",
@@ -2559,11 +2617,87 @@
       },
       "CreateReviewDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "serviceId": {
+            "type": "string",
+            "description": "ID del servicio a evaluar",
+            "example": "123"
+          },
+          "rating": {
+            "type": "number",
+            "description": "Puntuación del servicio (1-5)",
+            "example": 5,
+            "minimum": 1,
+            "maximum": 5
+          },
+          "comment": {
+            "type": "string",
+            "description": "Comentario de la review",
+            "example": "Excelente servicio, muy profesional y puntual"
+          }
+        },
+        "required": [
+          "serviceId",
+          "rating",
+          "comment"
+        ]
       },
-      "UpdateReviewDto": {
+      "Review": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único de la review",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "rating": {
+            "type": "number",
+            "description": "Puntuación del servicio (1-5)",
+            "example": 5
+          },
+          "comment": {
+            "type": "string",
+            "description": "Comentario de la review",
+            "example": "Excelente servicio, muy profesional y puntual"
+          },
+          "user": {
+            "description": "Usuario que realiza la review",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ]
+          },
+          "service": {
+            "description": "Servicio evaluado",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Service"
+              }
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de creación de la review",
+            "example": "2024-03-20T12:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fecha de última actualización de la review",
+            "example": "2024-03-20T12:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "rating",
+          "comment",
+          "user",
+          "service",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "CreateFavoriteDto": {
         "type": "object",

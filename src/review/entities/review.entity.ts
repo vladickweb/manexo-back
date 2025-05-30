@@ -2,36 +2,62 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  ManyToOne,
-  OneToOne,
-  JoinColumn,
   CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../user/entities/user.entity';
 import { Service } from '../../service/entities/service.entity';
-import { Contract } from '../../contract/entities/contract.entity';
 
 @Entity()
 export class Review {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @ApiProperty({
+    description: 'ID único de la review',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
+  @ApiProperty({
+    description: 'Puntuación del servicio (1-5)',
+    example: 5,
+  })
   @Column()
   rating: number;
 
+  @ApiProperty({
+    description: 'Comentario de la review',
+    example: 'Excelente servicio, muy profesional y puntual',
+  })
   @Column('text')
   comment: string;
 
+  @ApiProperty({
+    description: 'Usuario que realiza la review',
+    type: () => User,
+  })
   @ManyToOne(() => User, (user) => user.reviews)
   user: User;
 
+  @ApiProperty({
+    description: 'Servicio evaluado',
+    type: () => Service,
+  })
   @ManyToOne(() => Service, (service) => service.reviews)
   service: Service;
 
-  @OneToOne(() => Contract)
-  @JoinColumn()
-  contract: Contract;
-
+  @ApiProperty({
+    description: 'Fecha de creación de la review',
+    example: '2024-03-20T12:00:00.000Z',
+  })
   @CreateDateColumn()
   createdAt: Date;
+
+  @ApiProperty({
+    description: 'Fecha de última actualización de la review',
+    example: '2024-03-20T12:00:00.000Z',
+  })
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
