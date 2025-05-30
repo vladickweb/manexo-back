@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between } from 'typeorm';
+import { Repository, Between, In } from 'typeorm';
 import { Service } from './entities/service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
@@ -62,59 +62,86 @@ export class ServiceService {
 
   async findAll(
     filters: FilterServiceDto,
+    user?: User,
   ): Promise<PaginatedResponse<Service>> {
     const { page = 1, limit = 10 } = filters;
     const skip = (page - 1) * limit;
 
-    const queryBuilder = this.serviceRepository
+    const idQuery = this.serviceRepository
       .createQueryBuilder('service')
-      .distinct(true)
-      .leftJoinAndSelect('service.subcategory', 'subcategory')
-      .leftJoinAndSelect('subcategory.category', 'category')
-      .leftJoinAndSelect('service.reviews', 'reviews')
+      .select('service.id', 'id')
+      .leftJoin('service.subcategory', 'subcategory')
+      .leftJoin('subcategory.category', 'category')
+      .leftJoin('service.reviews', 'reviews')
       .leftJoin('reviews.user', 'reviewUser')
-      .leftJoinAndSelect('service.user', 'user')
-      .leftJoinAndSelect('user.location', 'location');
+      .leftJoin('service.user', 'user');
+
+    if (user) {
+      idQuery.andWhere('user.id != :userId', { userId: user.id });
+    }
 
     if (filters) {
       if (filters.subcategoryIds?.length > 0) {
-        queryBuilder.andWhere('service.subcategoryId IN (:...subcategoryIds)', {
+        idQuery.andWhere('service.subcategoryId IN (:...subcategoryIds)', {
           subcategoryIds: filters.subcategoryIds,
         });
       }
 
       if (filters.categoryId !== undefined) {
-        queryBuilder.andWhere('subcategory.categoryId = :categoryId', {
+        idQuery.andWhere('subcategory.categoryId = :categoryId', {
           categoryId: filters.categoryId,
         });
       }
 
       if (filters.minPrice !== undefined) {
-        queryBuilder.andWhere('service.price >= :minPrice', {
+        idQuery.andWhere('service.price >= :minPrice', {
           minPrice: filters.minPrice,
         });
       }
 
       if (filters.maxPrice !== undefined) {
-        queryBuilder.andWhere('service.price <= :maxPrice', {
+        idQuery.andWhere('service.price <= :maxPrice', {
           maxPrice: filters.maxPrice,
         });
       }
 
       if (filters.onlyActives === true) {
-        queryBuilder.andWhere('service.isActive = :isActive', {
+        idQuery.andWhere('service.isActive = :isActive', {
           isActive: true,
         });
       }
     }
 
-    queryBuilder.skip(skip).take(limit);
+    idQuery.skip(skip).take(limit);
 
-    const services = await queryBuilder.getMany();
+    const idsResult = await idQuery.getRawMany();
+    const serviceIds = idsResult.map((row) => row.id);
+
+    if (serviceIds.length === 0) {
+      return {
+        data: [],
+        meta: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        },
+      };
+    }
+
+    const services = await this.serviceRepository.find({
+      where: { id: In(serviceIds) },
+      relations: [
+        'subcategory',
+        'subcategory.category',
+        'reviews',
+        'reviews.user',
+        'user',
+        'user.location',
+      ],
+    });
 
     let filteredServices = services;
-
-    const totalFiltered = filteredServices.length;
 
     if (filters?.latitude && filters?.longitude) {
       for (const service of filteredServices) {
@@ -153,10 +180,10 @@ export class ServiceService {
     return {
       data: servicesWithStats,
       meta: {
-        total: totalFiltered,
+        total: serviceIds.length,
         page,
         limit,
-        totalPages: Math.ceil(totalFiltered / limit),
+        totalPages: Math.ceil(serviceIds.length / limit),
       },
     };
   }

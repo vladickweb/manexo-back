@@ -52,6 +52,7 @@ export class ServiceController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todos los servicios' })
   @ApiQuery({
     name: 'subcategoryIds',
@@ -134,8 +135,10 @@ export class ServiceController {
   )
   findAll(
     @Query() filters: FilterServiceDto,
+    @Req() req: Request,
   ): Promise<PaginatedResponse<Service>> {
-    return this.serviceService.findAll(filters);
+    const user = req.user as User | undefined;
+    return this.serviceService.findAll(filters, user);
   }
 
   @Get(':id')

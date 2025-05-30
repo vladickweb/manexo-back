@@ -41,7 +41,7 @@ export const dataSourceOptions: DataSourceOptions = {
   migrationsRun: false,
   synchronize: true,
   dropSchema: false,
-  logging: true,
+  logging: false,
   extra: {
     ssl: false,
     application_name: 'manexo-back',
