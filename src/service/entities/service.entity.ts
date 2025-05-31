@@ -35,7 +35,9 @@ export class Service {
   @Column({ default: false })
   requiresAcceptance: boolean;
 
-  @ManyToOne(() => User, (user) => user.services)
+  @ManyToOne(() => User, (user) => user.services, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @ManyToOne(() => Subcategory, (subcategory) => subcategory.services)

@@ -52,7 +52,9 @@ export class Availability {
     description: 'Usuario que ofrece el servicio',
     type: () => User,
   })
-  @ManyToOne(() => User, (user) => user.availabilities)
+  @ManyToOne(() => User, (user) => user.availabilities, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @ApiProperty({

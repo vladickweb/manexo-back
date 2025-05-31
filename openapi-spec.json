@@ -481,21 +481,21 @@
             }
           },
           {
-            "name": "onlyActives",
-            "required": false,
-            "in": "query",
-            "description": "Filtrar solo servicios activos (true) o todos (false)",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
             "name": "radius",
             "required": false,
             "in": "query",
             "description": "Radio de búsqueda en metros",
             "schema": {
               "type": "number"
+            }
+          },
+          {
+            "name": "onlyActives",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar solo servicios activos (true) o todos (false)",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],

@@ -64,17 +64,19 @@ export class ServiceService {
     filters: FilterServiceDto,
     user?: User,
   ): Promise<PaginatedResponse<Service>> {
-    const { page = 1, limit = 10 } = filters;
+    const { page, limit } = filters;
     const skip = (page - 1) * limit;
 
     const idQuery = this.serviceRepository
       .createQueryBuilder('service')
       .select('service.id', 'id')
+      .distinct(true)
       .leftJoin('service.subcategory', 'subcategory')
       .leftJoin('subcategory.category', 'category')
       .leftJoin('service.reviews', 'reviews')
       .leftJoin('reviews.user', 'reviewUser')
-      .leftJoin('service.user', 'user');
+      .leftJoin('service.user', 'user')
+      .leftJoin('user.location', 'userLocation');
 
     if (user) {
       idQuery.andWhere('user.id != :userId', { userId: user.id });
@@ -105,32 +107,47 @@ export class ServiceService {
         });
       }
 
-      if (filters.onlyActives === true) {
-        idQuery.andWhere('service.isActive = :isActive', {
-          isActive: true,
-        });
+      if (filters?.latitude && filters?.longitude) {
+        idQuery.andWhere(
+          `
+    6371 * acos(
+      cos(radians(:userLat)) *
+      cos(radians(userLocation.latitude)) *
+      cos(radians(userLocation.longitude) - radians(:userLon)) +
+      sin(radians(:userLat)) *
+      sin(radians(userLocation.latitude))
+    ) * 1000 <= service.radius
+  `,
+          {
+            userLat: filters.latitude,
+            userLon: filters.longitude,
+          },
+        );
       }
     }
 
+    idQuery.andWhere('service.isActive = :isActive', { isActive: true });
     idQuery.skip(skip).take(limit);
 
-    const idsResult = await idQuery.getRawMany();
-    const serviceIds = idsResult.map((row) => row.id);
+    const allIdsResult = await idQuery.getRawMany();
+    const allServiceIds = [...new Set(allIdsResult.map((row) => row.id))];
 
-    if (serviceIds.length === 0) {
+    const paginatedIds = allServiceIds.slice(skip, skip + limit);
+
+    if (paginatedIds.length === 0) {
       return {
         data: [],
         meta: {
-          total: 0,
+          total: allServiceIds.length,
           page,
           limit,
-          totalPages: 0,
+          totalPages: Math.ceil(allServiceIds.length / limit),
         },
       };
     }
 
-    const services = await this.serviceRepository.find({
-      where: { id: In(serviceIds) },
+    const servicesAll = await this.serviceRepository.find({
+      where: { id: In(paginatedIds) },
       relations: [
         'subcategory',
         'subcategory.category',
@@ -141,7 +158,7 @@ export class ServiceService {
       ],
     });
 
-    let filteredServices = services;
+    const filteredServices = servicesAll;
 
     if (filters?.latitude && filters?.longitude) {
       for (const service of filteredServices) {
@@ -155,12 +172,12 @@ export class ServiceService {
           service['distance'] = Math.round(distance);
         }
       }
-      filteredServices = filteredServices
+      filteredServices
         .filter((s) => s['distance'] !== undefined)
         .sort((a, b) => a['distance'] - b['distance']);
     }
 
-    const servicesWithStats = filteredServices.map((service) => {
+    const servicesWithStats = servicesAll.map((service) => {
       const totalReviews = service.reviews.length;
       const averageRating =
         totalReviews > 0
@@ -180,10 +197,10 @@ export class ServiceService {
     return {
       data: servicesWithStats,
       meta: {
-        total: serviceIds.length,
+        total: allServiceIds.length,
         page,
         limit,
-        totalPages: Math.ceil(serviceIds.length / limit),
+        totalPages: Math.ceil(allServiceIds.length / limit),
       },
     };
   }

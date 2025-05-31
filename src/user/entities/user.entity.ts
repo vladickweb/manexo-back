@@ -93,7 +93,7 @@ export class User {
     type: [Service],
     required: false,
   })
-  @OneToMany(() => Service, (service) => service.user)
+  @OneToMany(() => Service, (service) => service.user, { cascade: true })
   services: Service[];
 
   @OneToMany(() => Contract, (contract) => contract.client)
@@ -116,7 +116,9 @@ export class User {
     type: [Availability],
     required: false,
   })
-  @OneToMany(() => Availability, (availability) => availability.user)
+  @OneToMany(() => Availability, (availability) => availability.user, {
+    cascade: true,
+  })
   availabilities: Availability[];
 
   @ApiProperty({
@@ -124,19 +126,19 @@ export class User {
     type: [Booking],
     required: false,
   })
-  @OneToMany(() => Booking, (booking) => booking.client)
+  @OneToMany(() => Booking, (booking) => booking.client, { cascade: true })
   bookings: Booking[];
 
   @OneToMany(() => Booking, (booking) => booking.provider)
   providedServices: Booking[];
 
-  @OneToMany(() => Chat, (chat) => chat.user)
+  @OneToMany(() => Chat, (chat) => chat.user, { cascade: true })
   chats: Chat[];
 
   @OneToMany(() => Chat, (chat) => chat.serviceProvider)
   serviceChats: Chat[];
 
-  @OneToMany(() => Message, (message) => message.sender)
+  @OneToMany(() => Message, (message) => message.sender, { cascade: true })
   messages: Message[];
 
   @OneToOne(() => UserLocation, (location) => location.user, {

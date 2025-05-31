@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsNumber, IsBoolean, IsArray } from 'class-validator';
+import { IsOptional, IsNumber, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PaginationDto } from '@/service/dto/pagination.dto';
 
@@ -67,16 +67,6 @@ export class FilterServiceDto extends PaginationDto {
   @Type(() => Number)
   @IsOptional()
   longitude?: number;
-
-  @ApiProperty({
-    description: 'Filtrar solo servicios activos (true) o todos (false)',
-    required: false,
-    type: Boolean,
-  })
-  @IsBoolean()
-  @Type(() => Boolean)
-  @IsOptional()
-  onlyActives?: boolean;
 
   @ApiProperty({
     description: 'Número de elementos por página',
