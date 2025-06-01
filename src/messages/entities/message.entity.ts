@@ -29,6 +29,9 @@ export class Message {
   @Column({ default: false })
   isRead: boolean;
 
-  @CreateDateColumn()
+  @Column({ default: false })
+  isSystemMessage: boolean;
+
+  @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;
 }

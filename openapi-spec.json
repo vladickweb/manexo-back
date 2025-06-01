@@ -1735,6 +1735,17 @@
         }
       }
     },
+    "/chats/unread/count": {
+      "get": {
+        "operationId": "ChatsController_getUnreadMessagesCount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/user-location": {
       "post": {
         "operationId": "UserLocationController_create",

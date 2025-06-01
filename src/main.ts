@@ -6,17 +6,19 @@ import { json } from 'express';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
-  });
-
-  // Permitir múltiples orígenes: el local y el de producción en Vercel
-  app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'https://menexo-front-mctfrfo05-vladickwebs-projects.vercel.app',
-    ],
-    methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-    allowedHeaders: 'Content-Type,Authorization,stripe-signature',
-    credentials: true,
+    cors: {
+      origin: [
+        '*',
+        'http://192.168.1.155:5173',
+        'http://localhost:5173',
+        'https://menexo-front-mctfrfo05-vladickwebs-projects.vercel.app',
+      ],
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'stripe-signature'],
+      credentials: true,
+      preflightContinue: false,
+      optionsSuccessStatus: 204,
+    },
   });
 
   // Configurar el manejo del cuerpo de la solicitud

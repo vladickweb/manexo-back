@@ -18,7 +18,7 @@ export class ChatsController {
 
   @Post()
   async create(@Body() createChatDto: CreateChatDto, @Request() req) {
-    return this.chatsService.createChat(req.user.sub, createChatDto.serviceId);
+    return this.chatsService.createChat(req.user.id, createChatDto.serviceId);
   }
 
   @Get()
@@ -36,12 +36,17 @@ export class ChatsController {
     return this.chatsService.getChatMessages(id);
   }
 
+  @Get('unread/count')
+  async getUnreadMessagesCount(@Request() req) {
+    return this.chatsService.getUnreadMessagesCount(req.user.id);
+  }
+
   @Post(':id/messages')
   async sendMessage(
     @Param('id') id: string,
     @Body('content') content: string,
     @Request() req,
   ) {
-    return this.chatsService.createMessage(id, content, req.user.sub);
+    return this.chatsService.createMessage(id, content, req.user.id);
   }
 }

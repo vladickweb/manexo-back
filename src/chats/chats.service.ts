@@ -21,21 +21,26 @@ export class ChatsService {
   ) {}
 
   async createChat(userId: number, serviceId: number): Promise<Chat> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    const service = await this.serviceRepository.findOne({
-      where: { id: serviceId },
-      relations: ['user'],
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
     });
-
-    if (!user || !service) {
-      throw new NotFoundException('Usuario o servicio no encontrado');
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
     }
 
+    const service = await this.serviceRepository.findOne({
+      where: { id: serviceId },
+      relations: ['user', 'subcategory', 'subcategory.category'],
+    });
+    if (!service) {
+      throw new NotFoundException('Servicio no encontrado');
+    }
+
+    // Verificar si ya existe un chat entre estos usuarios para este servicio
     const existingChat = await this.chatRepository.findOne({
       where: {
         user: { id: userId },
         service: { id: serviceId },
-        isActive: true,
       },
     });
 
@@ -47,10 +52,22 @@ export class ChatsService {
       user,
       serviceProvider: service.user,
       service,
-      isActive: true,
     });
 
-    return this.chatRepository.save(chat);
+    const savedChat = await this.chatRepository.save(chat);
+
+    // Crear mensaje inicial con información del servicio
+    const initialMessage = this.messageRepository.create({
+      content: `Chat iniciado sobre el servicio: ${service.description}\nCategoría: ${service.subcategory.category.name}\nSubcategoría: ${service.subcategory.name}\nPrecio: $${service.price}`,
+      sender: service.user,
+      chat: savedChat,
+      isRead: false,
+      isSystemMessage: true,
+    });
+
+    await this.messageRepository.save(initialMessage);
+
+    return savedChat;
   }
 
   async getChatsByUser(userId: number): Promise<Chat[]> {
@@ -60,7 +77,13 @@ export class ChatsService {
 
     return this.chatRepository.find({
       // where: [{ user: { id: userId } }, { serviceProvider: { id: userId } }],
-      relations: ['user', 'serviceProvider', 'service', 'messages'],
+      relations: [
+        'user',
+        'serviceProvider',
+        'service',
+        'messages',
+        'messages.sender',
+      ],
       order: {
         updatedAt: 'DESC',
       },
@@ -70,7 +93,13 @@ export class ChatsService {
   async getChatById(chatId: string): Promise<Chat> {
     const chat = await this.chatRepository.findOne({
       where: { id: chatId },
-      relations: ['user', 'serviceProvider', 'service', 'messages'],
+      relations: [
+        'user',
+        'serviceProvider',
+        'service',
+        'messages',
+        'messages.sender',
+      ],
     });
 
     if (!chat) {
@@ -117,6 +146,19 @@ export class ChatsService {
   }
 
   async markMessagesAsRead(chatId: string, userId: number): Promise<void> {
+    // Verificar que el chat existe y el usuario es parte de él
+    const chat = await this.chatRepository.findOne({
+      where: [
+        { id: chatId, user: { id: userId } },
+        { id: chatId, serviceProvider: { id: userId } },
+      ],
+    });
+
+    if (!chat) {
+      throw new NotFoundException('Chat no encontrado o usuario no autorizado');
+    }
+
+    // Marcar como leídos solo los mensajes que no son del usuario actual
     await this.messageRepository.update(
       {
         chat: { id: chatId },
@@ -125,5 +167,76 @@ export class ChatsService {
       },
       { isRead: true },
     );
+  }
+
+  async getUnreadMessagesCount(
+    userId: number,
+  ): Promise<{ chatId: string; count: number }[]> {
+    const chats = await this.chatRepository.find({
+      where: [{ user: { id: userId } }, { serviceProvider: { id: userId } }],
+      relations: ['messages', 'messages.sender'],
+    });
+
+    return chats.map((chat) => ({
+      chatId: chat.id,
+      count: chat.messages.filter(
+        (message) => !message.isRead && message.sender.id !== userId,
+      ).length,
+    }));
+  }
+
+  async findOne(id: string): Promise<Chat> {
+    const chat = await this.chatRepository.findOne({
+      where: { id },
+      relations: ['user', 'serviceProvider', 'service'],
+    });
+
+    if (!chat) {
+      throw new NotFoundException('Chat no encontrado');
+    }
+
+    return chat;
+  }
+
+  async getLastReadMessage(
+    chatId: string,
+    userId: number,
+  ): Promise<Message | null> {
+    return await this.messageRepository.findOne({
+      where: {
+        chat: { id: chatId },
+        sender: { id: Not(userId) },
+        isRead: true,
+      },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async findByUserId(userId: number) {
+    return this.chatRepository.find({
+      where: [{ user: { id: userId } }, { serviceProvider: { id: userId } }],
+      relations: ['user', 'serviceProvider', 'messages', 'messages.sender'],
+      order: {
+        updatedAt: 'DESC',
+      },
+    });
+  }
+
+  async getLastMessage(chatId: string) {
+    const chat = await this.chatRepository.findOne({
+      where: { id: chatId },
+      relations: ['messages', 'messages.sender'],
+      order: {
+        messages: {
+          createdAt: 'DESC',
+        },
+      },
+    });
+
+    if (!chat?.messages?.length) {
+      return null;
+    }
+
+    return chat.messages[0];
   }
 }

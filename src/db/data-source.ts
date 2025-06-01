@@ -12,6 +12,7 @@ import { Booking } from '../booking/entities/booking.entity';
 import { Message } from '@/messages/entities/message.entity';
 import { Chat } from '@/chats/entities/chat.entity';
 import { UserLocation } from '@/user-location/entities/user-location.entity';
+import { Notification } from '@/notifications/entities/notification.entity';
 
 config();
 
@@ -35,6 +36,7 @@ export const dataSourceOptions: DataSourceOptions = {
     Chat,
     Message,
     UserLocation,
+    Notification,
   ],
   migrations: ['src/db/migrations/*.ts'],
   migrationsTableName: 'migrations',
@@ -52,6 +54,7 @@ export const dataSourceOptions: DataSourceOptions = {
       min: 2,
       idleTimeoutMillis: 30000,
     },
+    timezone: 'Europe/Madrid',
   },
 };
 

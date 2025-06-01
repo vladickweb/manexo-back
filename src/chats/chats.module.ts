@@ -9,10 +9,12 @@ import { User } from '../user/entities/user.entity';
 import { Service } from '../service/entities/service.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { Notification } from '../notifications/entities/notification.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Chat, Message, User, Service]),
+    TypeOrmModule.forFeature([Chat, Message, User, Service, Notification]),
     JwtModule.registerAsync({
       useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
@@ -20,9 +22,10 @@ import { ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService],
     }),
+    NotificationsModule,
   ],
   controllers: [ChatsController],
   providers: [ChatsService, ChatsGateway],
-  exports: [ChatsService],
+  exports: [ChatsService, ChatsGateway],
 })
 export class ChatsModule {}

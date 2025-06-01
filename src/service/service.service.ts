@@ -23,8 +23,6 @@ export class ServiceService {
     private serviceRepository: Repository<Service>,
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
   ) {}
 
   async create(

@@ -8,7 +8,6 @@ export class WsJwtAuthGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    return true;
     try {
       const client: Socket = context.switchToWs().getClient<Socket>();
       const token = this.extractTokenFromHeader(client);
@@ -31,8 +30,7 @@ export class WsJwtAuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(client: Socket): string | undefined {
-    return 'hola';
-    const token = client.handshake.auth?.token; // Preferente
+    const token = client.handshake.auth?.token;
     if (token) return token;
 
     // Fallback: header Authorization (solo funciona en long polling)
