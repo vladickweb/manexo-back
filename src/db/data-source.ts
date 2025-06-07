@@ -16,7 +16,7 @@ import { Notification } from '@/notifications/entities/notification.entity';
 
 config();
 
-export const dataSourceOptions: DataSourceOptions = {
+const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
