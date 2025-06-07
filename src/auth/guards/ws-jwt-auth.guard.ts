@@ -20,7 +20,6 @@ export class WsJwtAuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET,
       });
 
-      // Agregar el usuario al objeto del cliente para uso posterior
       client['user'] = payload;
 
       return true;
@@ -33,7 +32,6 @@ export class WsJwtAuthGuard implements CanActivate {
     const token = client.handshake.auth?.token;
     if (token) return token;
 
-    // Fallback: header Authorization (solo funciona en long polling)
     const [type, headerToken] =
       client.handshake.headers.authorization?.split(' ') ?? [];
     return type === 'Bearer' ? headerToken : undefined;

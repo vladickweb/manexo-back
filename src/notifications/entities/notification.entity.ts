@@ -41,7 +41,7 @@ export class Notification {
   isRead: boolean;
 
   @Column({ nullable: true })
-  data: string; // JSON string con datos adicionales (chatId, bookingId, etc)
+  data: string;
 
   @CreateDateColumn({ type: 'timestamp with time zone' })
   createdAt: Date;

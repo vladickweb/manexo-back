@@ -33,7 +33,6 @@ export class ReviewService {
       throw new NotFoundException('Servicio no encontrado');
     }
 
-    // Verificar que el usuario ha contratado y pagado el servicio
     const contract = await this.contractRepository.findOne({
       where: {
         service: { id: service.id },
@@ -48,7 +47,6 @@ export class ReviewService {
       );
     }
 
-    // Verificar que no existe una review previa del mismo usuario para este servicio
     const existingReview = await this.reviewRepository.findOne({
       where: {
         service: { id: service.id },

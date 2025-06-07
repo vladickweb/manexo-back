@@ -60,7 +60,6 @@ export class AppModule {
 
     const document = SwaggerModule.createDocument(app, config);
 
-    // Guardar la especificación OpenAPI como archivo JSON
     writeFileSync(
       join(process.cwd(), 'openapi-spec.json'),
       JSON.stringify(document, null, 2),

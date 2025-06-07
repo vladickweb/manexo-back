@@ -21,7 +21,6 @@ async function bootstrap() {
     },
   });
 
-  // Configurar el manejo del cuerpo de la solicitud
   app.use(
     json({
       verify: (req: any, res, buf) => {
@@ -37,7 +36,6 @@ async function bootstrap() {
     }),
   );
 
-  // Configurar Swagger
   await AppModule.setupSwagger(app);
 
   const port = process.env.PORT || 3000;

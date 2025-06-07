@@ -36,7 +36,6 @@ export class ChatsService {
       throw new NotFoundException('Servicio no encontrado');
     }
 
-    // Verificar si ya existe un chat entre estos usuarios para este servicio
     const existingChat = await this.chatRepository.findOne({
       where: {
         user: { id: userId },
@@ -56,7 +55,6 @@ export class ChatsService {
 
     const savedChat = await this.chatRepository.save(chat);
 
-    // Crear mensaje inicial con información del servicio
     const initialMessage = this.messageRepository.create({
       content: `Chat iniciado sobre el servicio: ${service.description}\nCategoría: ${service.subcategory.category.name}\nSubcategoría: ${service.subcategory.name}\nPrecio: ${service.price}€`,
       sender: service.user,
@@ -146,7 +144,6 @@ export class ChatsService {
   }
 
   async markMessagesAsRead(chatId: number, userId: number): Promise<void> {
-    // Verificar que el chat existe y el usuario es parte de él
     const chat = await this.chatRepository.findOne({
       where: [
         { id: chatId, user: { id: userId } },
@@ -158,7 +155,6 @@ export class ChatsService {
       throw new NotFoundException('Chat no encontrado o usuario no autorizado');
     }
 
-    // Marcar como leídos solo los mensajes que no son del usuario actual
     await this.messageRepository.update(
       {
         chat: { id: chatId },

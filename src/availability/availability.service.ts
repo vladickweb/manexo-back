@@ -75,13 +75,11 @@ export class AvailabilityService {
     batchAvailabilityDto: BatchAvailabilityDto,
     user: User,
   ): Promise<Availability[]> {
-    // Primero obtenemos todas las disponibilidades existentes del usuario
     const existingAvailabilities = await this.availabilityRepository.find({
       where: { user: { id: user.id } },
       relations: ['bookings'],
     });
 
-    // Separamos las disponibilidades con y sin reservas
     const availabilitiesWithBookings = existingAvailabilities.filter(
       (availability) =>
         availability.bookings && availability.bookings.length > 0,
@@ -92,14 +90,12 @@ export class AvailabilityService {
         !availability.bookings || availability.bookings.length === 0,
     );
 
-    // Eliminamos solo las disponibilidades sin reservas
     if (availabilitiesWithoutBookings.length > 0) {
       await this.availabilityRepository.delete(
         availabilitiesWithoutBookings.map((a) => a.id),
       );
     }
 
-    // Creamos las nuevas disponibilidades
     const newAvailabilities = batchAvailabilityDto.availabilities.map(
       (availabilityDto) =>
         this.availabilityRepository.create({
@@ -108,11 +104,9 @@ export class AvailabilityService {
         }),
     );
 
-    // Guardamos las nuevas disponibilidades
     const savedNewAvailabilities =
       await this.availabilityRepository.save(newAvailabilities);
 
-    // Retornamos todas las disponibilidades (las existentes con reservas + las nuevas)
     return [...availabilitiesWithBookings, ...savedNewAvailabilities];
   }
 }

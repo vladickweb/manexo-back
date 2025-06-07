@@ -49,7 +49,7 @@ export class StripeService {
 
     const price = await this.stripe.prices.create({
       product: product.id,
-      unit_amount: Math.round(amount * 100), // Stripe usa centavos
+      unit_amount: Math.round(amount * 100),
       currency: 'eur',
     });
 
@@ -73,7 +73,6 @@ export class StripeService {
       },
     });
 
-    // Añadimos el email prellenado al enlace
     const fullUrl = `${paymentLink.url}?prefilled_email=${encodeURIComponent(customerEmail)}`;
 
     return {
