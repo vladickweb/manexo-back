@@ -22,8 +22,8 @@ export enum ContractStatus {
 
 @Entity()
 export class Contract {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @ManyToOne(() => User)
   client: User;
@@ -31,7 +31,9 @@ export class Contract {
   @ManyToOne(() => User)
   provider: User;
 
-  @ManyToOne(() => Service)
+  @ManyToOne(() => Service, (service) => service.contracts, {
+    onDelete: 'CASCADE',
+  })
   service: Service;
 
   @OneToMany(() => Booking, (booking) => booking.contract)

@@ -73,6 +73,7 @@ export class FavoriteService {
         'service.subcategory',
         'service.subcategory.category',
         'service.reviews',
+        'service.user.location',
       ],
     });
 

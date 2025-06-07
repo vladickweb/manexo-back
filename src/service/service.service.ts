@@ -105,22 +105,43 @@ export class ServiceService {
         });
       }
 
-      if (filters?.latitude && filters?.longitude) {
+      if (filters.latitude && filters.longitude) {
+        idQuery.addSelect(
+          `
+        (
+          6371 * acos(
+            cos(radians(:userLat)) *
+            cos(radians(userLocation.latitude)) *
+            cos(radians(userLocation.longitude) - radians(:userLon)) +
+            sin(radians(:userLat)) *
+            sin(radians(userLocation.latitude))
+          )
+        )
+      `,
+          'distance',
+        );
+
         idQuery.andWhere(
           `
-    6371 * acos(
-      cos(radians(:userLat)) *
-      cos(radians(userLocation.latitude)) *
-      cos(radians(userLocation.longitude) - radians(:userLon)) +
-      sin(radians(:userLat)) *
-      sin(radians(userLocation.latitude))
-    ) * 1000 <= service.radius
-  `,
+        (
+          6371 * acos(
+            cos(radians(:userLat)) *
+            cos(radians(userLocation.latitude)) *
+            cos(radians(userLocation.longitude) - radians(:userLon)) +
+            sin(radians(:userLat)) *
+            sin(radians(userLocation.latitude))
+          )
+        ) * 1000 <= service.radius
+      `,
           {
             userLat: filters.latitude,
             userLon: filters.longitude,
           },
         );
+
+        idQuery.orderBy('distance', 'ASC');
+      } else {
+        idQuery.orderBy('service.createdAt', 'DESC');
       }
     }
 
@@ -156,10 +177,8 @@ export class ServiceService {
       ],
     });
 
-    const filteredServices = servicesAll;
-
-    if (filters?.latitude && filters?.longitude) {
-      for (const service of filteredServices) {
+    if (filters.latitude && filters.longitude) {
+      for (const service of servicesAll) {
         if (service.user?.location) {
           const distance = this.calculateDistance(
             filters.latitude,
@@ -170,9 +189,12 @@ export class ServiceService {
           service['distance'] = Math.round(distance);
         }
       }
-      filteredServices
-        .filter((s) => s['distance'] !== undefined)
-        .sort((a, b) => a['distance'] - b['distance']);
+
+      servicesAll.sort((a, b) => {
+        if (a['distance'] === undefined) return 1;
+        if (b['distance'] === undefined) return -1;
+        return a['distance'] - b['distance'];
+      });
     }
 
     const servicesWithStats = servicesAll.map((service) => {
@@ -220,8 +242,8 @@ export class ServiceService {
 
   private async getAvailableSlots(
     availabilities: Availability[],
-    bookings: Booking[],
     date: Date,
+    providerId: number,
   ): Promise<AvailableSlot[]> {
     const dayOfWeek = date.getDay();
     const availability = availabilities.find(
@@ -232,20 +254,19 @@ export class ServiceService {
       return [];
     }
 
-    const dayBookings = bookings.filter((booking) => {
-      const bookingDate = new Date(booking.date);
-      const targetDate = new Date(date);
-
-      const isSameDay =
-        bookingDate.getFullYear() === targetDate.getFullYear() &&
-        bookingDate.getMonth() === targetDate.getMonth() &&
-        bookingDate.getDate() === targetDate.getDate() &&
-        booking.status === BookingStatus.CONFIRMED;
-
-      return isSameDay;
+    const providerBookings = await this.bookingRepository.find({
+      where: {
+        service: { user: { id: providerId } },
+        date: Between(
+          new Date(date.setHours(0, 0, 0, 0)),
+          new Date(date.setHours(23, 59, 59, 999)),
+        ),
+        status: BookingStatus.CONFIRMED,
+      },
+      relations: ['service'],
     });
 
-    return this.calculateAvailableSlots(availability, dayBookings);
+    return this.calculateAvailableSlots(availability, providerBookings);
   }
 
   private calculateAvailableSlots(
@@ -323,23 +344,10 @@ export class ServiceService {
     }
 
     if (date) {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const bookings = await this.bookingRepository.find({
-        where: {
-          service: { id: service.id },
-          startTime: Between(startOfDay.toISOString(), endOfDay.toISOString()),
-        },
-      });
-
       const availableSlots = await this.getAvailableSlots(
         service.user.availabilities,
-        bookings,
         date,
+        service.user.id, // Pasamos el ID del proveedor
       );
 
       service.user.availabilities = service.user.availabilities.map(
@@ -381,6 +389,9 @@ export class ServiceService {
         'reviews.user',
         'user.location',
       ],
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
     return services.map((service) => {
@@ -416,13 +427,6 @@ export class ServiceService {
 
     const { start: weekStart, end: weekEnd } = this.getWeekDates(date);
 
-    const bookings = await this.bookingRepository.find({
-      where: {
-        service: { id: service.id },
-        date: Between(weekStart, weekEnd),
-      },
-    });
-
     const weekAvailability: DayAvailability[] = [];
     const currentDate = new Date(weekStart);
 
@@ -434,8 +438,8 @@ export class ServiceService {
       if (dayAvailability && dayAvailability.isActive) {
         const availableSlots = await this.getAvailableSlots(
           service.user.availabilities,
-          bookings,
-          currentDate,
+          new Date(currentDate),
+          service.user.id,
         );
 
         weekAvailability.push({

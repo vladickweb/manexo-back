@@ -23,10 +23,10 @@ export enum BookingStatus {
 export class Booking {
   @ApiProperty({
     description: 'ID único de la reserva',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: 1,
   })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @ApiProperty({
     description: 'Fecha de la reserva',
@@ -86,7 +86,9 @@ export class Booking {
     description: 'Servicio reservado',
     type: () => Service,
   })
-  @ManyToOne(() => Service, (service) => service.bookings)
+  @ManyToOne(() => Service, (service) => service.bookings, {
+    onDelete: 'CASCADE',
+  })
   service: Service;
 
   @ApiProperty({

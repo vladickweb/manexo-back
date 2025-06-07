@@ -13,8 +13,8 @@ import { Message } from '../../messages/entities/message.entity';
 
 @Entity()
 export class Chat {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @ManyToOne(() => User, (user) => user.chats)
   user: User;
@@ -22,7 +22,9 @@ export class Chat {
   @ManyToOne(() => User, (user) => user.serviceChats)
   serviceProvider: User;
 
-  @ManyToOne(() => Service, (service) => service.chats)
+  @ManyToOne(() => Service, (service) => service.chats, {
+    onDelete: 'CASCADE',
+  })
   service: Service;
 
   @OneToMany(() => Message, (message) => message.chat)

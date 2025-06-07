@@ -27,12 +27,12 @@ export class ChatsController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: number) {
     return this.chatsService.getChatById(id);
   }
 
   @Get(':id/messages')
-  async getMessages(@Param('id') id: string) {
+  async getMessages(@Param('id') id: number) {
     return this.chatsService.getChatMessages(id);
   }
 
@@ -43,7 +43,7 @@ export class ChatsController {
 
   @Post(':id/messages')
   async sendMessage(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body('content') content: string,
     @Request() req,
   ) {

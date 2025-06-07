@@ -75,11 +75,32 @@ export class AvailabilityService {
     batchAvailabilityDto: BatchAvailabilityDto,
     user: User,
   ): Promise<Availability[]> {
-    // Primero eliminamos todas las disponibilidades existentes del usuario
-    await this.availabilityRepository.delete({ user: { id: user.id } });
+    // Primero obtenemos todas las disponibilidades existentes del usuario
+    const existingAvailabilities = await this.availabilityRepository.find({
+      where: { user: { id: user.id } },
+      relations: ['bookings'],
+    });
+
+    // Separamos las disponibilidades con y sin reservas
+    const availabilitiesWithBookings = existingAvailabilities.filter(
+      (availability) =>
+        availability.bookings && availability.bookings.length > 0,
+    );
+
+    const availabilitiesWithoutBookings = existingAvailabilities.filter(
+      (availability) =>
+        !availability.bookings || availability.bookings.length === 0,
+    );
+
+    // Eliminamos solo las disponibilidades sin reservas
+    if (availabilitiesWithoutBookings.length > 0) {
+      await this.availabilityRepository.delete(
+        availabilitiesWithoutBookings.map((a) => a.id),
+      );
+    }
 
     // Creamos las nuevas disponibilidades
-    const availabilities = batchAvailabilityDto.availabilities.map(
+    const newAvailabilities = batchAvailabilityDto.availabilities.map(
       (availabilityDto) =>
         this.availabilityRepository.create({
           ...availabilityDto,
@@ -87,7 +108,11 @@ export class AvailabilityService {
         }),
     );
 
-    // Guardamos todas las nuevas disponibilidades
-    return this.availabilityRepository.save(availabilities);
+    // Guardamos las nuevas disponibilidades
+    const savedNewAvailabilities =
+      await this.availabilityRepository.save(newAvailabilities);
+
+    // Retornamos todas las disponibilidades (las existentes con reservas + las nuevas)
+    return [...availabilitiesWithBookings, ...savedNewAvailabilities];
   }
 }

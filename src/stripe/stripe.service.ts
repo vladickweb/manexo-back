@@ -20,7 +20,7 @@ export class StripeService {
     currency: string = 'eur',
   ): Promise<Stripe.PaymentIntent> {
     return await this.stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Stripe usa centavos
+      amount: Math.round(amount * 100),
       currency,
     });
   }
@@ -39,24 +39,21 @@ export class StripeService {
 
   async createPaymentLink(
     amount: number,
-    contractId: string,
+    contractId: number,
     customerEmail: string,
     serviceName: string,
-  ): Promise<Stripe.PaymentLink> {
-    // Primero creamos el producto
+  ): Promise<Stripe.PaymentLink & { fullUrl: string }> {
     const product = await this.stripe.products.create({
       name: serviceName,
     });
 
-    // Luego creamos el precio
     const price = await this.stripe.prices.create({
       product: product.id,
       unit_amount: Math.round(amount * 100), // Stripe usa centavos
       currency: 'eur',
     });
 
-    // Finalmente creamos el Payment Link
-    return await this.stripe.paymentLinks.create({
+    const paymentLink = await this.stripe.paymentLinks.create({
       line_items: [
         {
           price: price.id,
@@ -75,6 +72,14 @@ export class StripeService {
         customerEmail,
       },
     });
+
+    // Añadimos el email prellenado al enlace
+    const fullUrl = `${paymentLink.url}?prefilled_email=${encodeURIComponent(customerEmail)}`;
+
+    return {
+      ...paymentLink,
+      fullUrl,
+    };
   }
 
   async handleWebhookEvent(payload: Buffer, signature: string) {

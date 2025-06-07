@@ -2,7 +2,7 @@ export interface ServiceReviewStats {
   totalReviews: number;
   averageRating: number;
   reviews: {
-    id: string;
+    id: number;
     rating: number;
     comment: string;
     user: {

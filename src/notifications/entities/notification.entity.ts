@@ -19,8 +19,8 @@ export enum NotificationType {
 
 @Entity()
 export class Notification {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @ManyToOne(() => User)
   user: User;

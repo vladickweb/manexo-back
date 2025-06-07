@@ -58,7 +58,7 @@ export class ChatsService {
 
     // Crear mensaje inicial con información del servicio
     const initialMessage = this.messageRepository.create({
-      content: `Chat iniciado sobre el servicio: ${service.description}\nCategoría: ${service.subcategory.category.name}\nSubcategoría: ${service.subcategory.name}\nPrecio: $${service.price}`,
+      content: `Chat iniciado sobre el servicio: ${service.description}\nCategoría: ${service.subcategory.category.name}\nSubcategoría: ${service.subcategory.name}\nPrecio: ${service.price}€`,
       sender: service.user,
       chat: savedChat,
       isRead: false,
@@ -76,7 +76,7 @@ export class ChatsService {
     }
 
     return this.chatRepository.find({
-      // where: [{ user: { id: userId } }, { serviceProvider: { id: userId } }],
+      where: [{ user: { id: userId } }, { serviceProvider: { id: userId } }],
       relations: [
         'user',
         'serviceProvider',
@@ -90,7 +90,7 @@ export class ChatsService {
     });
   }
 
-  async getChatById(chatId: string): Promise<Chat> {
+  async getChatById(chatId: number): Promise<Chat> {
     const chat = await this.chatRepository.findOne({
       where: { id: chatId },
       relations: [
@@ -109,7 +109,7 @@ export class ChatsService {
     return chat;
   }
 
-  async getChatMessages(chatId: string): Promise<Message[]> {
+  async getChatMessages(chatId: number): Promise<Message[]> {
     await this.getChatById(chatId);
 
     return this.messageRepository.find({
@@ -122,7 +122,7 @@ export class ChatsService {
   }
 
   async createMessage(
-    chatId: string,
+    chatId: number,
     content: string,
     senderId: number,
   ): Promise<Message> {
@@ -145,7 +145,7 @@ export class ChatsService {
     return this.messageRepository.save(message);
   }
 
-  async markMessagesAsRead(chatId: string, userId: number): Promise<void> {
+  async markMessagesAsRead(chatId: number, userId: number): Promise<void> {
     // Verificar que el chat existe y el usuario es parte de él
     const chat = await this.chatRepository.findOne({
       where: [
@@ -171,7 +171,7 @@ export class ChatsService {
 
   async getUnreadMessagesCount(
     userId: number,
-  ): Promise<{ chatId: string; count: number }[]> {
+  ): Promise<{ chatId: number; count: number }[]> {
     const chats = await this.chatRepository.find({
       where: [{ user: { id: userId } }, { serviceProvider: { id: userId } }],
       relations: ['messages', 'messages.sender'],
@@ -185,7 +185,7 @@ export class ChatsService {
     }));
   }
 
-  async findOne(id: string): Promise<Chat> {
+  async findOne(id: number): Promise<Chat> {
     const chat = await this.chatRepository.findOne({
       where: { id },
       relations: ['user', 'serviceProvider', 'service'],
@@ -199,7 +199,7 @@ export class ChatsService {
   }
 
   async getLastReadMessage(
-    chatId: string,
+    chatId: number,
     userId: number,
   ): Promise<Message | null> {
     return await this.messageRepository.findOne({
@@ -222,7 +222,7 @@ export class ChatsService {
     });
   }
 
-  async getLastMessage(chatId: string) {
+  async getLastMessage(chatId: number) {
     const chat = await this.chatRepository.findOne({
       where: { id: chatId },
       relations: ['messages', 'messages.sender'],

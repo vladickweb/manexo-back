@@ -144,7 +144,7 @@ export class ContractService {
     return {
       contract: updatedContract,
       bookings,
-      paymentUrl: paymentLink.url,
+      paymentUrl: paymentLink.fullUrl,
     };
   }
 
@@ -153,10 +153,6 @@ export class ContractService {
       where: [
         {
           client: { id: userId },
-          status: ContractStatus.PAID,
-        },
-        {
-          provider: { id: userId },
           status: ContractStatus.PAID,
         },
       ],
@@ -198,7 +194,7 @@ export class ContractService {
     });
   }
 
-  async handlePaymentSuccess(contractId: string) {
+  async handlePaymentSuccess(contractId: number) {
     const contract = await this.contractRepository.findOne({
       where: { id: contractId },
       relations: ['bookings'],
@@ -238,7 +234,7 @@ export class ContractService {
     });
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const contract = await this.contractRepository.findOne({
       where: { id },
       relations: [

@@ -214,7 +214,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @UseGuards(WsJwtAuthGuard)
   @SubscribeMessage('joinChat')
-  async handleJoinChat(client: Socket, chatId: string) {
+  async handleJoinChat(client: Socket, chatId: number) {
     try {
       if (!chatId) {
         throw new WsException('ID del chat no proporcionado');
@@ -251,7 +251,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @UseGuards(WsJwtAuthGuard)
   @SubscribeMessage('leaveChat')
-  async handleLeaveChat(client: Socket, chatId: string) {
+  async handleLeaveChat(client: Socket, chatId: number) {
     try {
       if (!chatId) {
         throw new WsException('ID del chat no proporcionado');
@@ -267,7 +267,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @UseGuards(WsJwtAuthGuard)
   @SubscribeMessage('getLastReadMessage')
-  async handleGetLastReadMessage(client: Socket, chatId: string) {
+  async handleGetLastReadMessage(client: Socket, chatId: number) {
     try {
       if (!chatId) {
         throw new WsException('ID del chat no proporcionado');
@@ -396,7 +396,7 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @UseGuards(WsJwtAuthGuard)
   @SubscribeMessage('markMessagesAsRead')
-  async handleMarkMessagesAsRead(client: Socket, chatId: string) {
+  async handleMarkMessagesAsRead(client: Socket, chatId: number) {
     try {
       if (!chatId) {
         throw new WsException('ID del chat no proporcionado');

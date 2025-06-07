@@ -74,14 +74,14 @@ export class ContractController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: number) {
     return this.contractService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateContractDto: UpdateContractDto,
   ) {
     return this.contractService.update(+id, updateContractDto);
@@ -89,7 +89,7 @@ export class ContractController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: number) {
     return this.contractService.remove(+id);
   }
 }

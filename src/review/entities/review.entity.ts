@@ -14,10 +14,10 @@ import { Service } from '../../service/entities/service.entity';
 export class Review {
   @ApiProperty({
     description: 'ID único de la review',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    example: 1,
   })
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @ApiProperty({
     description: 'Puntuación del servicio (1-5)',
@@ -44,7 +44,9 @@ export class Review {
     description: 'Servicio evaluado',
     type: () => Service,
   })
-  @ManyToOne(() => Service, (service) => service.reviews)
+  @ManyToOne(() => Service, (service) => service.reviews, {
+    onDelete: 'CASCADE',
+  })
   service: Service;
 
   @ApiProperty({
