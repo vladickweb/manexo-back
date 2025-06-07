@@ -347,7 +347,7 @@ export class ServiceService {
       const availableSlots = await this.getAvailableSlots(
         service.user.availabilities,
         date,
-        service.user.id, // Pasamos el ID del proveedor
+        service.user.id,
       );
 
       service.user.availabilities = service.user.availabilities.map(

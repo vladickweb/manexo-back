@@ -173,10 +173,8 @@ export class ContractService {
     });
 
     return contracts.map((contract) => {
-      // Solo el cliente puede dejar review
       const canReview = contract.client.id === userId;
 
-      // Verificar si ya ha dejado review para este servicio
       const hasReviewed = contract.service.reviews.some(
         (review) => review.user?.id === userId,
       );

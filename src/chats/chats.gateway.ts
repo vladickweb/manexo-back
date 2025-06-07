@@ -90,7 +90,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client['user'] = payload;
       const userId = payload.sub;
 
-      // Desconectar conexiones anteriores del mismo usuario
       if (this.userSockets.has(userId)) {
         const existingSockets = this.userSockets.get(userId);
         for (const socketId of existingSockets) {
@@ -106,12 +105,10 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this.userSockets.delete(userId);
       }
 
-      // Unir al usuario a su sala personal
       const userRoom = `user:${userId}`;
       client.join(userRoom);
       this.logger.debug(`✅ Usuario ${userId} unido a sala ${userRoom}`);
 
-      // Guardar la conexión
       this.connectedClients.set(client.id, client);
       if (!this.userSockets.has(userId)) {
         this.userSockets.set(userId, new Set());
@@ -122,7 +119,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       this.logger.debug(`🔌 Usuario ${userId} conectado al WebSocket de chat`);
 
       try {
-        // Obtener todos los chats del usuario y unirse a sus salas
         const userChats = await this.chatsService.findByUserId(userId);
         for (const chat of userChats) {
           const roomName = `chat:${chat.id}`;
@@ -132,7 +128,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           );
         }
 
-        // Enviar últimos mensajes y notificaciones al usuario
         await this.sendLastMessagesToUser(userId);
         await this.sendUnreadNotifications(userId);
       } catch (error) {
@@ -143,7 +138,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
       }
 
-      // Enviar evento de conexión exitosa
       client.emit('connected', {
         userId,
         timestamp: new Date().toISOString(),
@@ -172,7 +166,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
       }
 
-      // Notificar a otros clientes del mismo usuario
       const remainingSockets = this.userSockets.get(userId);
       if (remainingSockets && remainingSockets.size > 0) {
         for (const socketId of remainingSockets) {
@@ -195,7 +188,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const userId = client['user'].sub;
       this.logger.debug(`Usuario ${userId} solicitando reconexión`);
 
-      // Enviar últimos mensajes y notificaciones al usuario
       await this.sendLastMessagesToUser(userId);
       await this.sendUnreadNotifications(userId);
 
@@ -238,7 +230,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         `Usuario ${client['user'].sub} se unió a la sala ${roomName}. Socket ID: ${client.id}`,
       );
 
-      // Verificar las salas a las que está unido el socket
       const rooms = Array.from(client.rooms);
       this.logger.debug(
         `Salas actuales del socket ${client.id}: ${rooms.join(', ')}`,
@@ -315,13 +306,11 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           ? chat.serviceProvider.id
           : chat.user.id;
 
-      // Obtener información del remitente
       const sender = await this.userRepository.findOne({
         where: { id: client['user'].sub },
         select: ['firstName', 'lastName', 'id'],
       });
 
-      // Crear la notificación
       const notification = await this.createNotification({
         userId: recipientId,
         type: NotificationType.NEW_MESSAGE,
@@ -336,16 +325,13 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
 
-      // Emitir la notificación al usuario destinatario
       this.server.to(`user:${recipientId}`).emit('notification', notification);
 
-      // Emitir el nuevo mensaje a todos los usuarios en el chat
       const roomName = `chat:${payload.chatId}`;
       this.logger.debug(
         `Emitiendo mensaje a la sala ${roomName}. Mensaje: ${JSON.stringify(message)}`,
       );
 
-      // Verificar los sockets en la sala
       const sockets = await this.server.in(roomName).fetchSockets();
       this.logger.debug(
         `Sockets en la sala ${roomName}: ${sockets.map((s) => s.id).join(', ')}`,
@@ -360,7 +346,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
 
-      // Emitir el último mensaje actualizado
       const lastMessagePayload = {
         chatId: payload.chatId,
         message: {
@@ -377,7 +362,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       };
 
-      // Emitir a ambos usuarios del chat
       this.server
         .to(`user:${chat.user.id}`)
         .emit('lastMessageUpdate', lastMessagePayload);
@@ -419,7 +403,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       await this.chatsService.markMessagesAsRead(chatId, userId);
       this.logger.debug(`Mensajes marcados como leídos en chat ${chatId}`);
 
-      // Eliminar todas las notificaciones no leídas relacionadas con este chat
       await this.deleteNotificationsByTypeAndData(
         NotificationType.NEW_MESSAGE,
         {
@@ -442,7 +425,6 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  // Métodos de notificaciones
   private async createNotification(notification: {
     userId: number;
     type: NotificationType;
@@ -557,11 +539,9 @@ export class ChatsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       if (lastMessages.length > 0) {
-        // Emitir cada mensaje individualmente
         for (const message of lastMessages) {
           this.server.to(`user:${userId}`).emit('lastMessageUpdate', message);
 
-          // También emitir el evento lastMessages para compatibilidad
           this.server.to(`user:${userId}`).emit('lastMessages', [message]);
         }
       }
