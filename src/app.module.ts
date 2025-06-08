@@ -15,6 +15,13 @@ import { join } from 'path';
 import { FavoriteModule } from './favorite/favorite.module';
 import config from './config';
 import dataSource from './db/data-source';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { AvailabilityModule } from './availability/availability.module';
+import { BookingModule } from './booking/booking.module';
+import { ChatsModule } from './chats/chats.module';
+import { StripeModule } from '@/stripe/stripe.module';
+import { UserLocationModule } from './user-location/user-location.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -32,6 +39,13 @@ import dataSource from './db/data-source';
     ContractModule,
     ReviewModule,
     FavoriteModule,
+    CloudinaryModule,
+    AvailabilityModule,
+    BookingModule,
+    ChatsModule,
+    StripeModule,
+    UserLocationModule,
+    NotificationsModule,
   ],
   providers: [],
 })
@@ -46,7 +60,6 @@ export class AppModule {
 
     const document = SwaggerModule.createDocument(app, config);
 
-    // Guardar la especificación OpenAPI como archivo JSON
     writeFileSync(
       join(process.cwd(), 'openapi-spec.json'),
       JSON.stringify(document, null, 2),

@@ -42,7 +42,12 @@ export class FavoriteService {
 
   async findAll() {
     return this.favoriteRepository.find({
-      relations: ['user', 'service'],
+      relations: [
+        'user',
+        'service',
+        'service.subcategory',
+        'service.subcategory.category',
+      ],
     });
   }
 
@@ -60,9 +65,38 @@ export class FavoriteService {
   }
 
   async findByUser(userId: number) {
-    return this.favoriteRepository.find({
+    const favorites = await this.favoriteRepository.find({
       where: { user: { id: userId } },
-      relations: ['user', 'service'],
+      relations: [
+        'service',
+        'service.user',
+        'service.subcategory',
+        'service.subcategory.category',
+        'service.reviews',
+        'service.user.location',
+      ],
+    });
+
+    return favorites.map((favorite) => {
+      const totalReviews = favorite.service.reviews.length;
+      const averageRating =
+        totalReviews > 0
+          ? favorite.service.reviews.reduce(
+              (acc, review) => acc + review.rating,
+              0,
+            ) / totalReviews
+          : 0;
+
+      return {
+        ...favorite,
+        service: {
+          ...favorite.service,
+          reviewStats: {
+            totalReviews,
+            averageRating: Number(averageRating.toFixed(1)),
+          },
+        },
+      };
     });
   }
 

@@ -1,40 +1,90 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsNumber, IsBoolean } from 'class-validator';
+import { IsOptional, IsNumber, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
+import { PaginationDto } from '@/service/dto/pagination.dto';
 
-export class FilterServiceDto {
+export class FilterServiceDto extends PaginationDto {
   @ApiProperty({
-    description: 'ID de la categoría para filtrar',
-    example: 1,
+    description: 'IDs de las subcategorías',
     required: false,
+    type: [Number],
+    isArray: true,
+  })
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  @IsOptional()
+  subcategoryIds?: number[];
+
+  @ApiProperty({
+    description: 'ID de la categoría',
+    required: false,
+    type: Number,
   })
   @IsNumber()
+  @Type(() => Number)
   @IsOptional()
   categoryId?: number;
 
   @ApiProperty({
-    description: 'Precio máximo del servicio',
-    example: 1000,
+    description: 'Precio mínimo',
     required: false,
+    type: Number,
   })
   @IsNumber()
-  @IsOptional()
-  maxPrice?: number;
-
-  @ApiProperty({
-    description: 'Precio mínimo del servicio',
-    example: 100,
-    required: false,
-  })
-  @IsNumber()
+  @Type(() => Number)
   @IsOptional()
   minPrice?: number;
 
   @ApiProperty({
-    description: 'Filtrar solo servicios activos',
-    example: true,
+    description: 'Precio máximo',
     required: false,
+    type: Number,
   })
-  @IsBoolean()
+  @IsNumber()
+  @Type(() => Number)
   @IsOptional()
-  isActive?: boolean;
+  maxPrice?: number;
+
+  @ApiProperty({
+    description: 'Latitud del usuario',
+    required: false,
+    example: 37.62332465580069,
+    type: Number,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  latitude?: number;
+
+  @ApiProperty({
+    description: 'Longitud del usuario',
+    required: false,
+    example: -0.9851654443962178,
+    type: Number,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  longitude?: number;
+
+  @ApiProperty({
+    description: 'Número de elementos por página',
+    required: false,
+    type: Number,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  limit?: number;
+
+  @ApiProperty({
+    description: 'Número de página',
+    required: false,
+    type: Number,
+  })
+  @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
+  page?: number;
 }

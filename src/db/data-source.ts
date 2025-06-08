@@ -7,23 +7,43 @@ import { Subcategory } from '../category/entities/subcategory.entity';
 import { Contract } from '../contract/entities/contract.entity';
 import { Review } from '../review/entities/review.entity';
 import { Favorite } from '../favorite/entities/favorite.entity';
+import { Availability } from '../availability/entities/availability.entity';
+import { Booking } from '../booking/entities/booking.entity';
+import { Message } from '@/messages/entities/message.entity';
+import { Chat } from '@/chats/entities/chat.entity';
+import { UserLocation } from '@/user-location/entities/user-location.entity';
+import { Notification } from '@/notifications/entities/notification.entity';
 
 config();
 
-export const dataSourceOptions: DataSourceOptions = {
+const dataSourceOptions: DataSourceOptions = {
   type: 'postgres',
   host: process.env.POSTGRES_HOST,
   port: parseInt(process.env.POSTGRES_PORT, 10) || 5432,
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [User, Service, Category, Subcategory, Contract, Review, Favorite],
+  entities: [
+    User,
+    Service,
+    Category,
+    Subcategory,
+    Contract,
+    Review,
+    Favorite,
+    Availability,
+    Booking,
+    Chat,
+    Message,
+    UserLocation,
+    Notification,
+  ],
   migrations: ['src/db/migrations/*.ts'],
   migrationsTableName: 'migrations',
   migrationsRun: false,
   synchronize: true,
   dropSchema: false,
-  logging: true,
+  logging: false,
   extra: {
     ssl: false,
     application_name: 'manexo-back',
@@ -34,6 +54,7 @@ export const dataSourceOptions: DataSourceOptions = {
       min: 2,
       idleTimeoutMillis: 30000,
     },
+    timezone: 'Europe/Madrid',
   },
 };
 

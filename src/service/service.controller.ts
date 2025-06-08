@@ -9,6 +9,8 @@ import {
   UseGuards,
   Req,
   Query,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -25,6 +27,9 @@ import { Service } from './entities/service.entity';
 import { Request } from 'express';
 import { User } from '../user/entities/user.entity';
 import { FilterServiceDto } from './dto/filter-service.dto';
+import { PaginatedResponse } from '../common/interfaces/paginated-response.interface';
+import { ServiceAvailabilityResponse } from './interfaces/service-availability.interface';
+import { GetAvailabilityQueryDto } from '@/service/dto/get-availability-query.dto';
 
 @ApiTags('services')
 @ApiBearerAuth()
@@ -47,18 +52,93 @@ export class ServiceController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener todos los servicios' })
-  @ApiQuery({ name: 'categoryId', required: false, type: String })
+  @ApiQuery({
+    name: 'subcategoryIds',
+    required: false,
+    type: [Number],
+    isArray: true,
+    description: 'IDs de las subcategorías a filtrar',
+  })
+  @ApiQuery({
+    name: 'categoryId',
+    required: false,
+    type: Number,
+    description: 'ID de la categoría a filtrar',
+  })
   @ApiQuery({ name: 'minPrice', required: false, type: Number })
   @ApiQuery({ name: 'maxPrice', required: false, type: Number })
-  @ApiQuery({ name: 'isActive', required: false, type: Boolean })
+  @ApiQuery({
+    name: 'onlyActives',
+    required: false,
+    type: Boolean,
+    description: 'Filtrar solo servicios activos (true) o todos (false)',
+  })
+  @ApiQuery({
+    name: 'latitude',
+    required: false,
+    type: Number,
+    description: 'Latitud del usuario',
+  })
+  @ApiQuery({
+    name: 'longitude',
+    required: false,
+    type: Number,
+    description: 'Longitud del usuario',
+  })
+  @ApiQuery({
+    name: 'radius',
+    required: false,
+    type: Number,
+    description: 'Radio de búsqueda en metros',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Número de página',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Número de elementos por página',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de servicios',
-    type: [Service],
+    description: 'Lista de servicios paginada',
+    schema: {
+      properties: {
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/Service' },
+        },
+        meta: {
+          type: 'object',
+          properties: {
+            total: { type: 'number' },
+            page: { type: 'number' },
+            limit: { type: 'number' },
+            totalPages: { type: 'number' },
+          },
+        },
+      },
+    },
   })
-  findAll(@Query() filters?: FilterServiceDto) {
-    return this.serviceService.findAll(filters);
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
+  findAll(
+    @Query() filters: FilterServiceDto,
+    @Req() req: Request,
+  ): Promise<PaginatedResponse<Service>> {
+    const user = req.user as User | undefined;
+    return this.serviceService.findAll(filters, user);
   }
 
   @Get(':id')
@@ -113,5 +193,32 @@ export class ServiceController {
   @ApiResponse({ status: 401, description: 'No autorizado' })
   findMyPublishedServices(@Req() req: Request) {
     return this.serviceService.findMyPublishedServices(req.user as User);
+  }
+
+  @Get(':id/availability')
+  @ApiOperation({
+    summary: 'Obtener disponibilidad de un servicio para una fecha específica',
+  })
+  @ApiQuery({
+    name: 'date',
+    required: false,
+    type: String,
+    description:
+      'Fecha de referencia para la semana en formato ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ). La semana va de lunes a domingo',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Disponibilidad del servicio',
+    type: ServiceAvailabilityResponse,
+  })
+  @ApiResponse({ status: 400, description: 'Formato de fecha inválido' })
+  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async getServiceAvailability(
+    @Param('id') id: string,
+    @Query() query: GetAvailabilityQueryDto,
+  ): Promise<ServiceAvailabilityResponse> {
+    const parsedDate = query.date ? new Date(query.date) : new Date();
+    return this.serviceService.getServiceAvailability(id, parsedDate);
   }
 }

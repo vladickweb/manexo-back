@@ -15,6 +15,10 @@ export default registerAs('config', () => {
       refreshSecret: process.env.JWT_REFRESH_SECRET,
       refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
     },
+    stripe: {
+      secretKey: process.env.STRIPE_SECRET_KEY,
+      webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    },
     nodeEnv: process.env.NODE_ENV || 'development',
   };
 

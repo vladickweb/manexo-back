@@ -11,6 +11,9 @@ import { User } from '../../user/entities/user.entity';
 import { Subcategory } from '../../category/entities/subcategory.entity';
 import { Contract } from '../../contract/entities/contract.entity';
 import { Review } from '../../review/entities/review.entity';
+import { Booking } from '../../booking/entities/booking.entity';
+import { Chat } from '../../chats/entities/chat.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Service {
@@ -23,13 +26,6 @@ export class Service {
   @Column('int')
   radius: number;
 
-  @Column('json')
-  location: {
-    latitude: number;
-    longitude: number;
-    address: string;
-  };
-
   @Column('decimal', { precision: 10, scale: 2 })
   price: number;
 
@@ -39,7 +35,9 @@ export class Service {
   @Column({ default: false })
   requiresAcceptance: boolean;
 
-  @ManyToOne(() => User, (user) => user.services)
+  @ManyToOne(() => User, (user) => user.services, {
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @ManyToOne(() => Subcategory, (subcategory) => subcategory.services)
@@ -50,6 +48,17 @@ export class Service {
 
   @OneToMany(() => Review, (review) => review.service)
   reviews: Review[];
+
+  @ApiProperty({
+    description: 'Lista de reservas asociadas al servicio',
+    type: [Booking],
+    required: false,
+  })
+  @OneToMany(() => Booking, (booking) => booking.service)
+  bookings: Booking[];
+
+  @OneToMany(() => Chat, (chat) => chat.service)
+  chats: Chat[];
 
   @CreateDateColumn()
   createdAt: Date;

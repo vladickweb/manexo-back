@@ -6,6 +6,10 @@ import {
   Patch,
   Param,
   Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -15,8 +19,12 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
 } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -51,6 +59,11 @@ export class UserController {
     return this.userService.findById(id);
   }
 
+  @Patch('test')
+  test() {
+    return { message: 'test' };
+  }
+
   @Patch(':id')
   @ApiOperation({ summary: 'Update a user' })
   @ApiResponse({
@@ -72,5 +85,43 @@ export class UserController {
   @ApiResponse({ status: 404, description: 'User not found.' })
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
+  }
+
+  @Post(':id/profile-image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOperation({ summary: 'Subir imagen de perfil' })
+  async uploadProfileImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile() file: any,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No se ha proporcionado ningún archivo');
+    }
+    return this.userService.updateProfileImage(id, file);
+  }
+
+  @Delete(':id/profile-image')
+  @ApiOperation({ summary: 'Eliminar imagen de perfil' })
+  async removeProfileImage(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.removeProfileImage(id);
   }
 }

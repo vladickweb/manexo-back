@@ -5,12 +5,19 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 import { Service } from '../../service/entities/service.entity';
 import { Contract } from '../../contract/entities/contract.entity';
 import { Review } from '../../review/entities/review.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Favorite } from '../../favorite/entities/favorite.entity';
+import { Availability } from '../../availability/entities/availability.entity';
+import { Booking } from '../../booking/entities/booking.entity';
+import { Chat } from '../../chats/entities/chat.entity';
+import { Message } from '../../messages/entities/message.entity';
+import { UserLocation } from '../../user-location/entities/user-location.entity';
 
 @Entity()
 export class User {
@@ -49,6 +56,7 @@ export class User {
     example: '********',
   })
   @Column()
+  @Exclude()
   password: string;
 
   @ApiProperty({
@@ -85,10 +93,10 @@ export class User {
     type: [Service],
     required: false,
   })
-  @OneToMany(() => Service, (service) => service.user)
+  @OneToMany(() => Service, (service) => service.user, { cascade: true })
   services: Service[];
 
-  @OneToMany(() => Contract, (contract) => contract.requester)
+  @OneToMany(() => Contract, (contract) => contract.client)
   contracts: Contract[];
 
   @OneToMany(() => Review, (review) => review.user)
@@ -96,4 +104,45 @@ export class User {
 
   @OneToMany(() => Favorite, (favorite) => favorite.user, { cascade: true })
   favorites: Favorite[];
+
+  @Column({ nullable: true })
+  profileImageUrl: string;
+
+  @Column({ nullable: true })
+  profileImagePublicId: string;
+
+  @ApiProperty({
+    description: 'Lista de disponibilidades del usuario',
+    type: [Availability],
+    required: false,
+  })
+  @OneToMany(() => Availability, (availability) => availability.user, {
+    cascade: true,
+  })
+  availabilities: Availability[];
+
+  @ApiProperty({
+    description: 'Lista de reservas realizadas por el usuario',
+    type: [Booking],
+    required: false,
+  })
+  @OneToMany(() => Booking, (booking) => booking.client, { cascade: true })
+  bookings: Booking[];
+
+  @OneToMany(() => Booking, (booking) => booking.provider)
+  providedServices: Booking[];
+
+  @OneToMany(() => Chat, (chat) => chat.user, { cascade: true })
+  chats: Chat[];
+
+  @OneToMany(() => Chat, (chat) => chat.serviceProvider)
+  serviceChats: Chat[];
+
+  @OneToMany(() => Message, (message) => message.sender, { cascade: true })
+  messages: Message[];
+
+  @OneToOne(() => UserLocation, (location) => location.user, {
+    cascade: true,
+  })
+  location: UserLocation;
 }
