@@ -1,5 +1,3 @@
-// src/auth/google.strategy.ts
-
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
@@ -48,7 +46,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
           firstName: name.givenName,
           lastName: name.familyName,
           picture: photos[0].value,
-          password: '', // La contraseña no es necesaria para usuarios de Google
+          password: '',
         });
       }
 
