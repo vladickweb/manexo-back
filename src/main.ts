@@ -11,7 +11,7 @@ async function bootstrap() {
         '*',
         'http://192.168.1.155:5173',
         'http://localhost:5173',
-        'https://menexo-front.vercel.app',
+        'https://manexo.vercel.app',
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'stripe-signature'],
