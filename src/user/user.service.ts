@@ -30,27 +30,27 @@ export class UserService {
     });
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: number): Promise<User | null> {
     return await this.userRepository.findOne({
-      where: { id: Number(id) },
+      where: { id },
       relations: ['location'],
     });
   }
 
   async update(
-    id: string,
+    id: number,
     updateUserDto: Partial<UpdateUserDto>,
   ): Promise<User | null> {
     await this.userRepository.update(id, updateUserDto);
     return await this.findById(id);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     await this.userRepository.delete(id);
   }
 
   async updateProfileImage(userId: number, file: any) {
-    const user = await this.findById(userId.toString());
+    const user = await this.findById(userId);
 
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
@@ -69,7 +69,7 @@ export class UserService {
   }
 
   async removeProfileImage(userId: number) {
-    const user = await this.findById(userId.toString());
+    const user = await this.findById(userId);
 
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
