@@ -19,7 +19,15 @@ export default registerAs('config', () => {
       secretKey: process.env.STRIPE_SECRET_KEY,
       webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
     },
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+    },
     nodeEnv: process.env.NODE_ENV || 'development',
+    frontend: {
+      url: process.env.FRONTEND_URL,
+    },
   };
 
   return envConfig;

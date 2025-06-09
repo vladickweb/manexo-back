@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@/user/entities/user.entity';
 import { JwtStrategy } from '@/auth/jwt.strategy';
 import { UserModule } from '../user/user.module';
+import { GoogleStrategy } from './google.strategy';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { UserModule } from '../user/user.module';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

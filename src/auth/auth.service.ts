@@ -7,6 +7,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import * as bcrypt from 'bcryptjs';
 import { instanceToPlain } from 'class-transformer';
+import { GoogleStrategy } from './google.strategy';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private googleStrategy: GoogleStrategy,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -63,7 +65,7 @@ export class AuthService {
     }
   }
 
-  private generateTokens(user: any) {
+  async generateTokens(user: any) {
     const payload = { sub: user.id, email: user.email };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -83,7 +85,7 @@ export class AuthService {
     };
   }
 
-  async getProfile(userId: string) {
+  async getProfile(userId: number) {
     const user = await this.userService.findById(userId);
 
     if (!user) {
@@ -91,5 +93,11 @@ export class AuthService {
     }
 
     return instanceToPlain(user);
+  }
+
+  getGoogleAuthUrl(): string {
+    return this.googleStrategy.getAuthUrl(
+      this.configService.get<string>('config.google.callbackURL'),
+    );
   }
 }

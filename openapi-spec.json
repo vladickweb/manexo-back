@@ -79,7 +79,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -116,7 +116,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -163,7 +163,7 @@
             "required": true,
             "in": "path",
             "schema": {
-              "type": "string"
+              "type": "number"
             }
           }
         ],
@@ -342,6 +342,28 @@
     "/auth/me": {
       "get": {
         "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "operationId": "AuthController_googleAuth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "operationId": "AuthController_googleAuthRedirect",
         "parameters": [],
         "responses": {
           "200": {
@@ -1934,6 +1956,11 @@
             "type": "string",
             "example": "Doe",
             "description": "Apellido del usuario"
+          },
+          "picture": {
+            "type": "string",
+            "example": "https://example.com/picture.jpg",
+            "description": "URL de la foto de perfil del usuario"
           }
         },
         "required": [
@@ -2334,29 +2361,31 @@
         "properties": {
           "email": {
             "type": "string",
-            "description": "Email del usuario",
-            "example": "user@example.com"
+            "example": "user@example.com",
+            "description": "Email del usuario"
           },
           "password": {
             "type": "string",
-            "description": "Contraseña del usuario",
             "example": "password123",
+            "description": "Contraseña del usuario",
             "minLength": 6
           },
           "firstName": {
             "type": "string",
-            "description": "Nombre del usuario",
-            "example": "John"
+            "example": "John",
+            "description": "Nombre del usuario"
           },
           "lastName": {
             "type": "string",
-            "description": "Apellido del usuario",
-            "example": "Doe"
+            "example": "Doe",
+            "description": "Apellido del usuario"
           }
         },
         "required": [
           "email",
-          "password"
+          "password",
+          "firstName",
+          "lastName"
         ]
       },
       "LoginDto": {
