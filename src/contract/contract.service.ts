@@ -149,47 +149,77 @@ export class ContractService {
   }
 
   async findByUserId(userId: number) {
-    const contracts = await this.contractRepository.find({
-      where: [
-        {
-          client: { id: userId },
-          status: ContractStatus.PAID,
+    const [clientContracts, providerContracts] = await Promise.all([
+      this.contractRepository.find({
+        where: [
+          {
+            client: { id: userId },
+            status: ContractStatus.PAID,
+          },
+        ],
+        relations: [
+          'service',
+          'service.user',
+          'client',
+          'provider',
+          'service.subcategory',
+          'service.subcategory.category',
+          'bookings',
+          'service.reviews',
+          'service.reviews.user',
+        ],
+        order: {
+          createdAt: 'DESC',
         },
-      ],
-      relations: [
-        'service',
-        'service.user',
-        'client',
-        'provider',
-        'service.subcategory',
-        'service.subcategory.category',
-        'bookings',
-        'service.reviews',
-        'service.reviews.user',
-      ],
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+      }),
+      this.contractRepository.find({
+        where: [
+          {
+            provider: { id: userId },
+            status: ContractStatus.PAID,
+          },
+        ],
+        relations: [
+          'service',
+          'service.user',
+          'client',
+          'provider',
+          'service.subcategory',
+          'service.subcategory.category',
+          'bookings',
+          'service.reviews',
+          'service.reviews.user',
+        ],
+        order: {
+          createdAt: 'DESC',
+        },
+      }),
+    ]);
 
-    return contracts.map((contract) => {
-      const canReview = contract.client.id === userId;
+    const formatContracts = (contracts: Contract[], isClient: boolean) => {
+      return contracts.map((contract) => {
+        const canReview = isClient && contract.client.id === userId;
+        const hasReviewed = contract.service.reviews.some(
+          (review) => review.user?.id === userId,
+        );
 
-      const hasReviewed = contract.service.reviews.some(
-        (review) => review.user?.id === userId,
-      );
+        return {
+          ...contract,
+          timeSlots: contract.bookings.map((booking) => ({
+            date: booking.date,
+            startTime: booking.startTime,
+            endTime: booking.endTime,
+            status: booking.status,
+          })),
+          canReview: canReview && !hasReviewed,
+        };
+      });
+    };
 
-      return {
-        ...contract,
-        timeSlots: contract.bookings.map((booking) => ({
-          date: booking.date,
-          startTime: booking.startTime,
-          endTime: booking.endTime,
-          status: booking.status,
-        })),
-        canReview: canReview && !hasReviewed,
-      };
-    });
+    return {
+      clientContracts: formatContracts(clientContracts, true),
+      providerContracts: formatContracts(providerContracts, false),
+    };
   }
 
   async handlePaymentSuccess(contractId: number) {
