@@ -15,6 +15,7 @@ import {
   AvailableSlot,
 } from './interfaces/service-availability.interface';
 import { BookingStatus } from '../booking/entities/booking.entity';
+import { UserLocation } from '../user-location/entities/user-location.entity';
 
 @Injectable()
 export class ServiceService {
@@ -23,6 +24,8 @@ export class ServiceService {
     private serviceRepository: Repository<Service>,
     @InjectRepository(Booking)
     private bookingRepository: Repository<Booking>,
+    @InjectRepository(UserLocation)
+    private userLocationRepository: Repository<UserLocation>,
   ) {}
 
   async create(
@@ -34,6 +37,22 @@ export class ServiceService {
       user: { id: user.id },
       subcategory: { id: createServiceDto.subcategory },
     });
+
+    if (createServiceDto.location) {
+      let userLocation = await this.userLocationRepository.findOne({
+        where: { user: { id: user.id } },
+      });
+      if (userLocation) {
+        Object.assign(userLocation, createServiceDto.location);
+        await this.userLocationRepository.save(userLocation);
+      } else {
+        userLocation = this.userLocationRepository.create({
+          ...createServiceDto.location,
+          user,
+        });
+        await this.userLocationRepository.save(userLocation);
+      }
+    }
 
     return await this.serviceRepository.save(service);
   }
@@ -368,6 +387,22 @@ export class ServiceService {
     updateServiceDto: UpdateServiceDto,
   ): Promise<Service> {
     const service = await this.findOne(id);
+
+    if (updateServiceDto.location && service.user) {
+      let userLocation = await this.userLocationRepository.findOne({
+        where: { user: { id: service.user.id } },
+      });
+      if (userLocation) {
+        Object.assign(userLocation, updateServiceDto.location);
+        await this.userLocationRepository.save(userLocation);
+      } else {
+        userLocation = this.userLocationRepository.create({
+          ...updateServiceDto.location,
+          user: service.user,
+        });
+        await this.userLocationRepository.save(userLocation);
+      }
+    }
 
     Object.assign(service, updateServiceDto);
     return await this.serviceRepository.save(service);

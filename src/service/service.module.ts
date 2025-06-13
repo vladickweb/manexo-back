@@ -9,6 +9,7 @@ import { Subcategory } from '../category/entities/subcategory.entity';
 import { Contract } from '../contract/entities/contract.entity';
 import { Review } from '../review/entities/review.entity';
 import { Booking } from '../booking/entities/booking.entity';
+import { UserLocation } from '@/user-location/entities/user-location.entity';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { Booking } from '../booking/entities/booking.entity';
       Contract,
       Review,
       Booking,
+      UserLocation,
     ]),
   ],
   controllers: [ServiceController],
