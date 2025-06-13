@@ -167,6 +167,7 @@ export class ContractService {
           'bookings',
           'service.reviews',
           'service.reviews.user',
+          'service.user.location',
         ],
         order: {
           createdAt: 'DESC',
@@ -189,6 +190,7 @@ export class ContractService {
           'bookings',
           'service.reviews',
           'service.reviews.user',
+          'service.user.location',
         ],
         order: {
           createdAt: 'DESC',
