@@ -270,6 +270,7 @@ export class ContractService {
       relations: [
         'service',
         'service.user',
+        'service.user.location',
         'client',
         'provider',
         'service.subcategory',
