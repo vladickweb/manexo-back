@@ -10,85 +10,192 @@ import {
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiBody,
+  ApiParam,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+  ApiBadRequestResponse,
+} from '@nestjs/swagger';
 import { Review } from './entities/review.entity';
 import { ServiceReviewStats } from './interfaces/service-review-stats.interface';
 
-@ApiTags('reviews')
+@ApiTags('Reviews')
 @Controller('reviews')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Crear una nueva review' })
-  @ApiResponse({
-    status: 201,
-    description: 'La review ha sido creada exitosamente',
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Create a new review',
+    description: 'Creates a new review for a service',
+  })
+  @ApiBody({
+    type: CreateReviewDto,
+    description: 'Review creation data',
+  })
+  @ApiCreatedResponse({
+    description: 'Review created successfully',
     type: Review,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - JWT token required',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 401 },
+        message: { type: 'string', example: 'Unauthorized' },
+        error: { type: 'string', example: 'Unauthorized' },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid input data or user already reviewed this service',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: {
+          type: 'string',
+          example: 'User already reviewed this service',
+        },
+        error: { type: 'string', example: 'Bad Request' },
+      },
+    },
   })
   create(@Body() createReviewDto: CreateReviewDto, @Request() req) {
     return this.reviewService.create(createReviewDto, req.user);
   }
 
   @Get('service/:id')
-  @ApiOperation({ summary: 'Obtener todas las reviews de un servicio' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de reviews del servicio',
+  @ApiOperation({
+    summary: 'Get reviews by service',
+    description: 'Retrieves all reviews for a specific service',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Service ID',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'List of reviews for the service retrieved successfully',
     type: [Review],
+  })
+  @ApiNotFoundResponse({
+    description: 'Service not found',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'Service not found' },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
   })
   findByServiceId(@Param('id') id: string) {
     return this.reviewService.findByServiceId(id);
   }
 
   @Get('user/:id')
-  @ApiOperation({ summary: 'Obtener todas las reviews de un usuario' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de reviews del usuario',
+  @ApiOperation({
+    summary: 'Get reviews by user',
+    description: 'Retrieves all reviews created by a specific user',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'User ID',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'List of reviews by the user retrieved successfully',
     type: [Review],
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'User not found' },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
   })
   findByUserId(@Param('id') id: string) {
     return this.reviewService.findByUserId(Number(id));
   }
 
   @Get('service/:id/stats')
-  @ApiOperation({ summary: 'Obtener estadísticas de reviews de un servicio' })
-  @ApiResponse({
-    status: 200,
-    description: 'Estadísticas de reviews del servicio',
+  @ApiOperation({
+    summary: 'Get service review statistics',
+    description:
+      'Retrieves review statistics and detailed reviews for a specific service',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Service ID',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Service review statistics retrieved successfully',
     schema: {
       type: 'object',
       properties: {
         totalReviews: {
           type: 'number',
-          description: 'Número total de reviews',
+          description: 'Total number of reviews',
+          example: 15,
         },
         averageRating: {
           type: 'number',
-          description: 'Promedio de puntuaciones (1-5)',
+          description: 'Average rating (1-5)',
+          example: 4.2,
         },
         reviews: {
           type: 'array',
           items: {
             type: 'object',
             properties: {
-              id: { type: 'string' },
-              rating: { type: 'number' },
-              comment: { type: 'string' },
+              id: { type: 'string', example: '1' },
+              rating: { type: 'number', example: 5 },
+              comment: { type: 'string', example: 'Excellent service!' },
               user: {
                 type: 'object',
                 properties: {
-                  id: { type: 'number' },
-                  firstName: { type: 'string' },
-                  lastName: { type: 'string' },
+                  id: { type: 'number', example: 1 },
+                  firstName: { type: 'string', example: 'John' },
+                  lastName: { type: 'string', example: 'Doe' },
                 },
               },
-              createdAt: { type: 'string', format: 'date-time' },
+              createdAt: {
+                type: 'string',
+                format: 'date-time',
+                example: '2024-01-15T10:30:00Z',
+              },
             },
           },
         },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Service not found',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'Service not found' },
+        error: { type: 'string', example: 'Not Found' },
       },
     },
   })
