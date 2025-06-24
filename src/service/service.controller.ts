@@ -19,9 +19,14 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   ApiTags,
   ApiOperation,
-  ApiResponse,
   ApiBearerAuth,
   ApiQuery,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+  ApiParam,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { Service } from './entities/service.entity';
 import { Request } from 'express';
@@ -31,7 +36,7 @@ import { PaginatedResponse } from '../common/interfaces/paginated-response.inter
 import { ServiceAvailabilityResponse } from './interfaces/service-availability.interface';
 import { GetAvailabilityQueryDto } from '@/service/dto/get-availability-query.dto';
 
-@ApiTags('services')
+@ApiTags('Services')
 @ApiBearerAuth()
 @Controller('services')
 export class ServiceController {
@@ -39,75 +44,114 @@ export class ServiceController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Crear un nuevo servicio' })
-  @ApiResponse({
-    status: 201,
-    description: 'Servicio creado exitosamente',
+  @ApiOperation({
+    summary: 'Create a new service',
+    description: 'Creates a new service with the provided information',
+  })
+  @ApiBody({
+    type: CreateServiceDto,
+    description: 'Service creation data',
+  })
+  @ApiCreatedResponse({
+    description: 'Service created successfully',
     type: Service,
   })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({ status: 404, description: 'Categoría no encontrada' })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - JWT token required',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 401 },
+        message: { type: 'string', example: 'Unauthorized' },
+        error: { type: 'string', example: 'Unauthorized' },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Category not found',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'Category not found' },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
+  })
   create(@Body() createServiceDto: CreateServiceDto, @Req() req: Request) {
     return this.serviceService.create(createServiceDto, req.user as User);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Obtener todos los servicios' })
+  @ApiOperation({
+    summary: 'Get all services',
+    description:
+      'Retrieves a paginated list of services with optional filtering options',
+  })
   @ApiQuery({
     name: 'subcategoryIds',
     required: false,
     type: [Number],
     isArray: true,
-    description: 'IDs de las subcategorías a filtrar',
+    description: 'Filter by subcategory IDs',
   })
   @ApiQuery({
     name: 'categoryId',
     required: false,
     type: Number,
-    description: 'ID de la categoría a filtrar',
+    description: 'Filter by category ID',
   })
-  @ApiQuery({ name: 'minPrice', required: false, type: Number })
-  @ApiQuery({ name: 'maxPrice', required: false, type: Number })
+  @ApiQuery({
+    name: 'minPrice',
+    required: false,
+    type: Number,
+    description: 'Minimum price filter',
+  })
+  @ApiQuery({
+    name: 'maxPrice',
+    required: false,
+    type: Number,
+    description: 'Maximum price filter',
+  })
   @ApiQuery({
     name: 'onlyActives',
     required: false,
     type: Boolean,
-    description: 'Filtrar solo servicios activos (true) o todos (false)',
+    description: 'Filter only active services (true) or all services (false)',
   })
   @ApiQuery({
     name: 'latitude',
     required: false,
     type: Number,
-    description: 'Latitud del usuario',
+    description: 'User latitude for location-based filtering',
   })
   @ApiQuery({
     name: 'longitude',
     required: false,
     type: Number,
-    description: 'Longitud del usuario',
+    description: 'User longitude for location-based filtering',
   })
   @ApiQuery({
     name: 'radius',
     required: false,
     type: Number,
-    description: 'Radio de búsqueda en metros',
+    description: 'Search radius in meters for location-based filtering',
   })
   @ApiQuery({
     name: 'page',
     required: false,
     type: Number,
-    description: 'Número de página',
+    description: 'Page number for pagination',
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
-    description: 'Número de elementos por página',
+    description: 'Number of items per page',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de servicios paginada',
+  @ApiOkResponse({
+    description: 'Paginated list of services retrieved successfully',
     schema: {
       properties: {
         data: {
@@ -117,12 +161,26 @@ export class ServiceController {
         meta: {
           type: 'object',
           properties: {
-            total: { type: 'number' },
-            page: { type: 'number' },
-            limit: { type: 'number' },
-            totalPages: { type: 'number' },
+            total: { type: 'number', description: 'Total number of services' },
+            page: { type: 'number', description: 'Current page number' },
+            limit: { type: 'number', description: 'Items per page' },
+            totalPages: {
+              type: 'number',
+              description: 'Total number of pages',
+            },
           },
         },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - JWT token required',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 401 },
+        message: { type: 'string', example: 'Unauthorized' },
+        error: { type: 'string', example: 'Unauthorized' },
       },
     },
   })
@@ -142,29 +200,76 @@ export class ServiceController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obtener un servicio por ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'Servicio encontrado',
+  @ApiOperation({
+    summary: 'Get a service by ID',
+    description: 'Retrieves a specific service by its ID',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Service ID',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Service retrieved successfully',
     type: Service,
   })
-  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
+  @ApiNotFoundResponse({
+    description: 'Service not found',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'Service not found' },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
+  })
   findOne(@Param('id') id: string) {
     return this.serviceService.findOne(id);
   }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Actualizar un servicio' })
-  @ApiResponse({
-    status: 200,
-    description: 'Servicio actualizado',
+  @ApiOperation({
+    summary: 'Update a service',
+    description: 'Updates an existing service with new information',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Service ID',
+    type: 'string',
+    example: '1',
+  })
+  @ApiBody({
+    type: UpdateServiceDto,
+    description: 'Service update data',
+  })
+  @ApiOkResponse({
+    description: 'Service updated successfully',
     type: Service,
   })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({
-    status: 404,
-    description: 'Servicio o categoría no encontrada',
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - JWT token required',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 401 },
+        message: { type: 'string', example: 'Unauthorized' },
+        error: { type: 'string', example: 'Unauthorized' },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Service or category not found',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'Service not found' },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
   })
   update(@Param('id') id: string, @Body() updateServiceDto: UpdateServiceDto) {
     return this.serviceService.update(id, updateServiceDto);
@@ -172,10 +277,47 @@ export class ServiceController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Eliminar un servicio' })
-  @ApiResponse({ status: 200, description: 'Servicio eliminado' })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
-  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
+  @ApiOperation({
+    summary: 'Delete a service',
+    description: 'Permanently deletes a service from the system',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Service ID',
+    type: 'string',
+    example: '1',
+  })
+  @ApiOkResponse({
+    description: 'Service deleted successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Service deleted successfully' },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - JWT token required',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 401 },
+        message: { type: 'string', example: 'Unauthorized' },
+        error: { type: 'string', example: 'Unauthorized' },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'Service not found',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'Service not found' },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
+  })
   remove(@Param('id') id: string) {
     return this.serviceService.remove(id);
   }
@@ -183,37 +325,78 @@ export class ServiceController {
   @Get('me/published')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({
-    summary: 'Obtener los servicios publicados por el usuario autenticado',
+    summary: "Get user's published services",
+    description: 'Retrieves all services published by the authenticated user',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de servicios publicados por el usuario',
+  @ApiOkResponse({
+    description: "User's published services retrieved successfully",
     type: [Service],
   })
-  @ApiResponse({ status: 401, description: 'No autorizado' })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - JWT token required',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 401 },
+        message: { type: 'string', example: 'Unauthorized' },
+        error: { type: 'string', example: 'Unauthorized' },
+      },
+    },
+  })
   findMyPublishedServices(@Req() req: Request) {
     return this.serviceService.findMyPublishedServices(req.user as User);
   }
 
   @Get(':id/availability')
   @ApiOperation({
-    summary: 'Obtener disponibilidad de un servicio para una fecha específica',
+    summary: 'Get service availability',
+    description: 'Retrieves the availability of a service for a specific date',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Service ID',
+    type: 'string',
+    example: '1',
   })
   @ApiQuery({
     name: 'date',
-    required: false,
-    type: String,
-    description:
-      'Fecha de referencia para la semana en formato ISO 8601 (YYYY-MM-DDTHH:mm:ss.sssZ). La semana va de lunes a domingo',
+    required: true,
+    type: 'string',
+    description: 'Date to check availability (YYYY-MM-DD)',
+    example: '2024-01-15',
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Disponibilidad del servicio',
-    type: ServiceAvailabilityResponse,
+  @ApiOkResponse({
+    description: 'Service availability retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        serviceId: { type: 'string' },
+        date: { type: 'string' },
+        availableSlots: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              startTime: { type: 'string', example: '09:00' },
+              endTime: { type: 'string', example: '10:00' },
+              isAvailable: { type: 'boolean' },
+            },
+          },
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 400, description: 'Formato de fecha inválido' })
-  @ApiResponse({ status: 404, description: 'Servicio no encontrado' })
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  @ApiNotFoundResponse({
+    description: 'Service not found',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 404 },
+        message: { type: 'string', example: 'Service not found' },
+        error: { type: 'string', example: 'Not Found' },
+      },
+    },
+  })
   async getServiceAvailability(
     @Param('id') id: string,
     @Query() query: GetAvailabilityQueryDto,

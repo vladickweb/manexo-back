@@ -32,7 +32,7 @@ INSERT INTO "user" ("firstName", "lastName", email, password, "isActive", "creat
 ('María', 'García', 'maria@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
 ('Juan', 'Martínez', 'juan@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
 ('Ana', 'López', 'ana@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
-('Pedro', 'Sánchez', 'pedro@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
+('Pedro', 'García', 'pedro@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
 ('Laura', 'Fernández', 'laura@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
 ('Carlos', 'Rodríguez', 'carlos@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
 ('Sofía', 'González', 'sofia@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
@@ -54,7 +54,7 @@ INSERT INTO "user" ("firstName", "lastName", email, password, "isActive", "creat
 ('Patricia', 'Rubio', 'patricia@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
 ('Fernando', 'Méndez', 'fernando@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
 ('Cristina', 'Aguilar', 'cristina@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW()),
-('Vladyslav', 'Kapkan', 'vladickbaraza@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW());
+('Alfredo', 'García', 'alfredo@gmail.com', '$2b$10$jGfWU6wSqggVFbwerKelmetJowYPUQejIYYARh23bEiFiM531R89i', true, NOW(), NOW());
 
 -- Inserción de ubicaciones en Murcia
 INSERT INTO user_location ("userId", latitude, longitude, address, "streetName", "streetNumber", city, province, country, "postalCode") VALUES
@@ -675,7 +675,7 @@ SELECT
         WHEN c.id = 1 THEN 'Tienes un nuevo mensaje de María García'
         WHEN c.id = 2 THEN 'Tienes un nuevo mensaje de Juan Martínez'
         WHEN c.id = 3 THEN 'Tienes un nuevo mensaje de Ana López'
-        WHEN c.id = 4 THEN 'Tienes un nuevo mensaje de Pedro Sánchez'
+        WHEN c.id = 4 THEN 'Tienes un nuevo mensaje de Pedro García'
         WHEN c.id = 5 THEN 'Tienes un nuevo mensaje de Laura Fernández'
         WHEN c.id = 6 THEN 'Tienes un nuevo mensaje de Carlos Rodríguez'
         WHEN c.id = 7 THEN 'Tienes un nuevo mensaje de Sofía González'
